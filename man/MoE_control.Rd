@@ -9,8 +9,9 @@ MoE_control(criterion = c("bic", "icl", "aic"), stopping = c("aitken",
   "mclust", "random"), eps = .Machine$double.eps, tol = c(1e-05,
   sqrt(.Machine$double.eps), 1e-08), itmax = c(.Machine$integer.max,
   .Machine$integer.max, 100), equalPro = FALSE, warn.it = 0,
-  noise.init = NULL, noise.meth = c("hypvol", "convexhull",
-  "ellipsoidhull"), hc.meth = NULL, verbose = interactive(), ...)
+  noise.init = NULL, noise.gate = TRUE, noise.meth = c("hypvol",
+  "convexhull", "ellipsoidhull"), hc.meth = NULL, hcUse = "VARS",
+  verbose = interactive(), ...)
 }
 \arguments{
 \item{criterion}{When either \code{G} or \code{modelNames} is a vector, \code{criterion} determines whether the "\code{bic}" (Bayesian Information Criterion), "\code{icl}" (Integrated Complete Likelihood), "\code{aic}" (Akaike Information Criterion) is used to determine the 'best' model when gathering output. Note that all criteria will be returned in any case.}
@@ -18,10 +19,10 @@ MoE_control(criterion = c("bic", "icl", "aic"), stopping = c("aitken",
 \item{stopping}{The criterion used to assess convergence of the EM algorithm. The default (\code{"aitken"}) uses Aitken's acceleration method via \code{\link{MoE_aitken}}, otherwise the \code{"relative"} change in log-likelihood is monitored (which may be less strict). Both stopping rules are ultimately governed by \code{tol[1]}. When the \code{"aitken"} method is employed, the final estimate of the log-likelihood is the value of \code{linf} at convergence, rather than the value of \code{ll} at convergence under the \code{"relative"} option.}
 
 \item{exp.init}{A list supplying select parameters to control the initialisation routine in the presence of \emph{expert} network covariates (otherwise ignored):
-\itemize{
-\item{\code{"joint"} - }{A logical indicating whether the initial partition is obtained on the joint distribution of the response and (continuous only) expert network covariates (defaults to \code{TRUE}) or just the response variables (\code{FALSE}). Only relevant when \code{init.z} is not \code{"random"}. This may render the \code{"quantile"} option to \code{init.z} for univariate data unusable.}
-\item{\code{"mahalanobis"} - }{A logical indicating whether to iteratively reallocate observations during the initialisation phase to the component corresponding to the expert network regression to which it's closest to the fitted values of in terms of Mahalanobis distance (defaults to \code{TRUE}). This will ensure that each component can be well modelled by a single expert prior to running the EM algorithm.}
-\item{\code{"max.init"} - }{The maximum number of iterations for the Mahalanobis distance-based reallocation procedure when \code{exp.init$mahalanobis} is \code{TRUE}. Defaults to \code{100}.}
+\describe{
+\item{\code{joint}}{A logical indicating whether the initial partition is obtained on the joint distribution of the response and (continuous only) expert network covariates (defaults to \code{TRUE}) or just the response variables (\code{FALSE}). Only relevant when \code{init.z} is not \code{"random"}. This may render the \code{"quantile"} option to \code{init.z} for univariate data unusable.}
+\item{\code{mahalanobis}}{A logical indicating whether to iteratively reallocate observations during the initialisation phase to the component corresponding to the expert network regression to which it's closest to the fitted values of in terms of Mahalanobis distance (defaults to \code{TRUE}). This will ensure that each component can be well modelled by a single expert prior to running the EM algorithm.}
+\item{\code{max.init}}{The maximum number of iterations for the Mahalanobis distance-based reallocation procedure when \code{exp.init$mahalanobis} is \code{TRUE}. Defaults to \code{100}.}
 }}
 
 \item{init.z}{The method used to initialise the cluster labels. Defaults to a hierarchical clustering tree as per \code{\link[mclust]{hc}} for multivariate data, or quantile-based clustering as per \code{\link{MoE_qclass}} for univariate data (unless there are continuous expert network covariates, in which case the defaults is again \code{\link[mclust]{hc}}). The \code{"quantile"} option is only available for univariate data without continuous expert network covariates. Other options include \code{kmeans}, \code{random} initialisation, and a full run of \code{\link[mclust]{Mclust}}, although this last option is only permitted if there are \code{gating} &/or \code{expert} covariates within \code{\link{MoE_clust}}.}
@@ -30,17 +31,23 @@ MoE_control(criterion = c("bic", "icl", "aic"), stopping = c("aitken",
 
 \item{tol}{A vector of length three giving relative convergence tolerances for 1) the log-likelihood of the EM algorithm, 2) parameter convergence in the inner loop for models with iterative M-step ("VEI", "EVE", "VEE", "VVE", "VEV"), and 3) optimisation in the multinomial logistic regression in the gating network, respectively. The default is \code{c(1e-05, sqrt(.Machine$double.eps), 1e-08)}. If only one number is supplied, it is used as the tolerance for all three cases given.}
 
-\item{itmax}{A vector of length three giving integer limits on the number of iterations for 1) the EM algorithm, 2) the inner loop for models with iterative M-step ("VEI", "EVE", "VEE", "VVE", "VEV"), and 3) the multinomial logistic regression in the gating network, respectively. The default is \code{c(.Machine$integer.max, .Machine$integer.max, 100)} allowing termination to be completely governed by \code{tol} for the inner and outer loops of the EM. If only one number is supplied, it is used as the iteration limit for the outer loop only.}
+\item{itmax}{A vector of length three giving integer limits on the number of iterations for 1) the EM algorithm, 2) the inner loop for models with iterative M-step ("VEI", "EVE", "VEE", "VVE", "VEV"), and 3) the multinomial logistic regression in the gating network, respectively.
 
-\item{equalPro}{Logical variable indicating whether or not the mixing proportions are equal in the model. Default: \code{equalPro = FALSE}. Only relevant when \code{gating} covariates are \emph{not} supplied within \code{\link{MoE_clust}}, otherwise ignored.}
+The default is \code{c(.Machine$integer.max, .Machine$integer.max, 100)} allowing termination to be completely governed by \code{tol} for the inner and outer loops of the EM. If only one number is supplied, it is used as the iteration limit for the outer loop only.}
+
+\item{equalPro}{Logical variable indicating whether or not the mixing proportions are to be constrained to be equal in the model. Default: \code{equalPro = FALSE}. Only relevant when \code{gating} covariates are \emph{not} supplied within \code{\link{MoE_clust}}, otherwise ignored. In the presence of a noise component (see below), only the mixing proportions for the non-noise components are constrained to be equal, after accounting for the noise component.}
 
 \item{warn.it}{A single number giving the iteration count at which a warning will be printed if the EM algorithm has failed to converge. Defaults to \code{0}, i.e. no warning (which is true for any \code{warn.it} value less than \code{3}), otherwise the message is printed regardless of the value of \code{verbose}. If non-zero, \code{warn.it} should be moderately large, but obviously less than \code{itmax[1]}. A warning will always be printed if one of more models fail to converge in \code{itmax[1]} iterations.}
 
 \item{noise.init}{A logical or numeric vector indicating an initial guess as to which observations are noise in the data. If numeric, the entries should correspond to row indices of the data. If supplied, a noise term will be added to the model in the estimation.}
 
+\item{noise.gate}{A logical indicating whether gating network covariates influence the mixing proportion for the noise component, if any. Defaults to \code{TRUE}, but leads to greater parsimony if \code{FALSE}. Only relevant in the presence of a noise component; only effects estimation in the presence of gating covariates.}
+
 \item{noise.meth}{The method use to estimate the volume when observations are labelled as noise via \code{noise.init}. Defaults to \code{\link[mclust]{hypvol}}. For univariate data, this argument is ignored and the range of the data is used instead. The options "\code{convexhull}" and "\code{ellipsoidhull}" require loading the \code{geometry} and \code{cluster} libraries, respectively.}
 
 \item{hc.meth}{A character string indicating the model to be used when hierarchical clustering (see \code{\link[mclust]{hc}} is employed for initialisation according to \code{init.z}. Defaults to \code{"EII"} for high-dimensional data, or \code{"VVV"} otherwise.}
+
+\item{hcUse}{A string specifying the type of input variables to be used when \code{init.z} is set to \code{hc}. Unlike \code{mclust}, this defaults to "\code{VARS}" here.}
 
 \item{verbose}{Logical indicating whether to print messages pertaining to progress to the screen during fitting. By default is \code{TRUE} if the session is interactive, and \code{FALSE} otherwise. If \code{FALSE}, warnings and error messages will still be printed to the screen, but everything else will be suppressed.}
 
@@ -53,12 +60,14 @@ A named list in which the names are the names of the arguments and the values ar
 Supplies a list of arguments (with defaults) for use with \code{\link{MoE_clust}}.
 }
 \details{
-\code{\link{MoE_control}} is provided for assigning values and defaults within \code{\link{MoE_clust}}.\cr
+\code{\link{MoE_control}} is provided for assigning values and defaults within \code{\link{MoE_clust}}.
 
 While the \code{criterion} argument controls the choice of the optimal number of components and \pkg{mclust} model type, \code{\link{MoE_compare}} is provided for choosing between fits with different combinations of covariates or different initialisation settings.
 }
 \note{
 When initialising using the \code{"hc"} option for the \code{init.z} argument, the \code{"EII"} model is used for high-dimensional data, otherwise \code{"VVV"} is used.
+
+Note also that, unlike \code{mclust}, the \code{hcUse} argument to \code{\link[mclust]{mclust.options}} is set to "\code{VARS}" by default.
 }
 \examples{
 ctrl <- MoE_control(criterion="icl", itmax=100, warn.it=15, init.z="random")
@@ -76,8 +85,9 @@ res2 <- MoE_clust(CO2data$CO2, G=2, expert = ~ GNP, stopping="relative")
 res3 <- MoE_clust(CO2data$CO2, G=2, expert = ~ GNP, ctrl)}
 }
 \seealso{
-\code{\link{MoE_clust}}, \code{\link{MoE_aitken}}, \code{\link[mclust]{hc}}, \code{\link{MoE_qclass}}, \code{\link[mclust]{hypvol}}, \code{\link[geometry]{convhulln}}, \code{\link[cluster]{ellipsoidhull}}, \code{\link{MoE_compare}}
+\code{\link{MoE_clust}}, \code{\link{MoE_aitken}}, \code{\link[mclust]{hc}}, \code{\link[mclust]{mclust.options}}, \code{\link{MoE_qclass}}, \code{\link[mclust]{hypvol}}, \code{\link[geometry]{convhulln}}, \code{\link[cluster]{ellipsoidhull}}, \code{\link{MoE_compare}}
 }
 \author{
-Keefe Murphy - \href{keefe.murphy@ucd.ie}{<keefe.murphy@ucd.ie>}
+Keefe Murphy - <\email{keefe.murphy@ucd.ie}>
 }
+\keyword{control}

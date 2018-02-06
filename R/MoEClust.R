@@ -8,7 +8,7 @@
 #'
 #' A dedicated plotting function exists for visualising the results using generalised pairs plots, for examining the gating network &/or log-likelihood, and/or graphing model selection criteria values. The generalised pairs plots (\code{\link{MoE_gpairs}}) visualise all pairwise relationships between clustered response variables and associated gating &/or expert network continuous &/or categorical variables, coloured according to the MAP classification, and also give the marginal distributions of each variable along the diagonal.
 #'
-#' An \code{as.Mclust} method is provided to coerce the output of class \code{"MoEClust"} from \code{\link{MoE_clust}} to the \code{"Mclust"} class, to facilitate use of plotting and other functions for the \code{"Mclust"} class within the \pkg{mclust} package. As per \pkg{mclust}, \pkg{MoEClust} also facilitates modelling with an additional noise component.
+#' An \code{as.Mclust} method is provided to coerce the output of class \code{"MoEClust"} from \code{\link{MoE_clust}} to the \code{"Mclust"} class, to facilitate use of plotting and other functions for the \code{"Mclust"} class within the \pkg{mclust} package. As per \pkg{mclust}, \pkg{MoEClust} also facilitates modelling with an additional noise component (with or without the mixing proportion for the noise component depending on covariates).
 #'
 #' The package also contains two data sets: \code{ais} and \code{CO2data}.
 #'
@@ -16,17 +16,16 @@
 #' \itemize{
 #' \item{Type: }{Package}
 #' \item{Package: }{MoEClust}
-#' \item{Version: }{1.0.0}
-#' \item{Date: }{2017-11-28}
+#' \item{Version: }{1.1.0}
+#' \item{Date: }{2018-02-06 (this version), 2017-11-28 (original release)}
 #' \item{Licence: }{GPL (>=2)}
 #' }
 #'
 #' @author
-#' Keefe Murphy [aut, cre]
+#' Keefe Murphy [aut, cre], Thomas Brendan Murphy [ctb]
 #'
-#' Maintainer: Keefe Murphy - \href{keefe.murphy@ucd.ie}{<keefe.murphy@ucd.ie>}
-#'
-#' @references K. Murphy and T. B. Murphy (2017). Parsimonious Model-Based Clustering with Gating and Expert Network Covariates. \emph{To appear}. <\href{https://arxiv.org/abs/1711.05632}{arXiv:1711.05632}>.
+#' \strong{Maintainer}: Keefe Murphy - <\email{keefe.murphy@@ucd.ie}>
+#' @references K. Murphy and T. B. Murphy (2017). Parsimonious Model-Based Clustering with Covariates. \emph{To appear}. <\href{https://arxiv.org/abs/1711.05632}{arXiv:1711.05632}>.
 #' @examples
 #' \dontrun{
 #' data(ais)
@@ -43,6 +42,7 @@
 #' m4    <- MoE_clust(CO2, G=2, gating= ~ GNP, expert= ~ GNP)
 #' MoE_compare(m1, m2, m3, m4)}
 #' @docType package
+#' @keywords package
 #' @name MoEClust
 NULL
 
