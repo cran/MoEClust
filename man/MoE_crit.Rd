@@ -4,8 +4,15 @@
 \alias{MoE_crit}
 \title{MoEClust BIC, ICL, and AIC Model-Selection Criteria}
 \usage{
-MoE_crit(modelName, loglik, n, d, G, gating.pen = G - 1, expert.pen = G * d,
-  z = NULL, df = NULL, delta = 0.5)
+MoE_crit(modelName,
+         loglik,
+         n,
+         d,
+         G,
+         gating.pen = G - 1,
+         expert.pen = G * d,
+         z = NULL,
+         df = NULL)
 }
 \arguments{
 \item{modelName}{A character string indicating the model. The help file for \code{\link[mclust]{mclustModelNames}} describes the available models.}
@@ -14,15 +21,13 @@ MoE_crit(modelName, loglik, n, d, G, gating.pen = G - 1, expert.pen = G * d,
 
 \item{n, d, G}{The number of observations in the data, dimension of the data, and number of components in the Gaussian mixture model, respectively, used to compute \code{loglik}. \code{d} & \code{G} are not necessary if \code{df} is supplied.}
 
-\item{gating.pen}{The number of parameters of the \emph{gating} network of the MoEClust model. Defaults to \code{G - 1}, which corresponds to no gating covariates. If covariates are included, this should be the number of regression coefficients in the fitted object. If there are no covariates and mixing proportions are further assumed to be present in equal proportion, \code{gating.pen} should be \code{0}. Not necessary if \code{df} is supplied.}
+\item{gating.pen}{The number of parameters of the \emph{gating} network of the MoEClust model. Defaults to \code{G - 1}, which corresponds to no gating covariates. If covariates are included, this should be the number of regression coefficients in the fitted \code{gating} object. If there are no covariates and mixing proportions are further assumed to be present in equal proportion, \code{gating.pen} should be \code{0}. The number of parameters used in the estimation of the noise component, if any, should also be included. Not necessary if \code{df} is supplied.}
 
-\item{expert.pen}{The number of parameters of the \emph{expert} network of the MoEClust model. Defaults to \code{G * d}, which corresponds to no expert covariates. If covariates are included, this should be the number of regression coefficients in the fitted object. Not necessary if \code{df} is supplied.}
+\item{expert.pen}{The number of parameters of the \emph{expert} network of the MoEClust model. Defaults to \code{G * d}, which corresponds to no expert covariates. If covariates are included, this should be the number of regression coefficients in the fitted \code{expert} object. Not necessary if \code{df} is supplied.}
 
 \item{z}{The \code{n} times \code{G} responsibility matrix whose \code{[i,k]}-th entry is the probability that observation \emph{i} belonds to the \emph{k}-th component.. If supplied the ICL is also computed and returned, otherwise only the BIC and AIC.}
 
 \item{df}{An alternative way to specify the number of estimated parameters (or 'used' degrees of freedom) exactly. If supplied, the arguments \code{d, G, gating.pen} and \code{expert.pen}, which are used to calculate the number of parameters, will be ignored. The number of parameters used in the estimation of the noise component, if any, should also be included.}
-
-\item{delta}{Dirichlet hyperparameter for the prior on the mixing proportions. Defaults to 0.5. Only relevant for the ICL computation.}
 }
 \value{
 A simplified array containing the BIC, AIC, number of estimated parameters (\code{df}) and, if \code{z} is supplied, also the ICL, for each of the given input arguments.
@@ -34,6 +39,8 @@ Computes the BIC (Bayesian Information Criterion), ICL (Integrated Complete Like
 The function is vectorized with respect to the arguments \code{modelName} and \code{loglik}.
 
 If \code{model} is an object of class \code{"MoEClust"} with \code{G} components, the number of parameters for the \code{gating.pen} and \code{expert.pen} are \code{length(coef(model$gating))} and \code{G * length(coef(model$expert[[1]]))}, respectively.
+
+Models with a noise component are facilitated here too provided the extra number of parameters are accounted for by the user.
 }
 \note{
 In order to speed up repeated calls to the function inside \code{\link{MoE_clust}}, no checks take place.

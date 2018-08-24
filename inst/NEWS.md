@@ -1,7 +1,77 @@
-__MoEClust: Finite Gaussian Mixtures of Experts -__   
+__MoEClust: Gaussian Parsimonious Clustering Models -__   
 =======================================================
-__Parsimonious Model-Based Clustering with Covariates__  
+__with Gating and Expert Network Covariates__  
 =======================================================
+
+## MoEClust v1.2.0 - (_3<sup>rd</sup> release [minor update]: 2018-08-24_)
+### New Features & Improvements
+* New `predict.MoEClust` function added: predicts cluster membership probability,  
+  MAP classification, and fitted response, using only new covariates or new covariates &  
+  new response data, with noise components (and the `noise.gate` option) accounted for.
+* New plotting function `MoE_Uncertainty` added (callable within `plot.MoEClust`):  
+  visualises clustering uncertainty in the form of a barplot or an ordered profile plot,  
+  allowing reference to be made to the true labels, or not, in both cases.
+* Specifying `response.type="density"` to `MoE_gpairs` now works properly for models with  
+  gating &/or expert network covariates. Previous approach which evaluated the density using  
+  averaged gates &/or averaged means replaced by more computationally expensive but correct  
+  approach, which evaluates MVN density for every observation individually and then averages.
+* Added `clustMD` package to `Suggests:`. New `MoE_control` argument `exp.init$clustMD`  
+  governs whether categorical/ordinal covariates are also incorporated into the initialisation  
+  when `isTRUE(exp.init$joint)` & `clustMD` is loaded (defaults to `FALSE`, works with noise). 
+* Added `drop.break` arg. to `MoE_control` for further control over the extra initialisation  
+  step invoked in the presence of expert covariates (see Documentation for details).
+* Sped-up `MoE_dens` for the `EEE` & `VVV` models by using already available Cholesky factors.
+* Other new `MoE_control` arguments:  
+    * `km.args` specifies `kstarts` & `kiters` when `init.z="kmeans"`.
+    * Consolidated args. related to `init.z="hc"` & noise into `hc.args` & `noise.args`.
+    * `hc.args` now also passed to call to `mclust` when `init.z="mclust"`.
+    * `init.crit` (`"bic"`/`"icl"`) controls selection of optimal `mclust`/`clustMD`  
+       model type to initialise with (if `init.z="mclust"` or `isTRUE(exp.init$clustMD)`);  
+       relatedly, initialisation now sped-up when `init.z="mclust"`.
+
+### Bug Fixes & Miscellaneous Edits
+* `ITERS` replaces `iters` as the matrix of the number of EM iterations in `MoE_clust` output:  
+    * `iters` now gives this number for the optimal model.  
+	  * `ITERS` now behaves like `BIC`/`ICL` etc. in inheriting the `"MoECriterion"` class.  
+	  * `iters` now filters down to `summary.MoEClust` and the associated printing function.  
+	  * `ITERS` now filters down to `MoE_compare` and the associated printing function.
+* Fixed point-size, transparency, & plotting symbols when `response.type="uncertainty"`  
+  within `MoE_gpairs` to better conform to `mclust`: previously no transparency.
+* `subset` arg. to `MoE_gpairs` now allows `data.ind=0` or `cov.ind=0`, allowing plotting of  
+  response variables or plotting of the covariates to be suppressed entirely.
+* Clarified MVN ellipses in `MoE_gpairs` plots.
+* `sigs` arg. to `MoE_dens` and `MoE_estep` must now be a variance object, as per `variance`  
+  in the  parameters list from `MoE_clust` & `mclust` output, the number of  clusters `G`,  
+  variables `d` & `modelName` is inferred from this object: the arg. `modelName` was removed.
+* `MoE_clust` no longer returns an error if `init.z="mclust"` when no gating/expert network  
+   covariates are supplied; instead, `init.z="hc"` is used to better reproduce `mclust` output.
+* `resid.data` now returned by `MoE_clust` as a list, to better conform to `MoE_dens`.
+* Renamed functions `MoE_aitken` & `MoE_qclass` to `aitken` & `quant_clust`, respectively.
+* Rows of `data` w/ missing values now dropped for gating/expert covariates too (`MoE_clust`).
+* Logical covariates in gating/expert networks now coerced to factors.
+* Fixed small bug calculating `linf` within `aitken` & the associated stopping criterion.
+* Final `linf` estimate now returned for optimal model when `stopping="aitken"` & G > 1.
+* Removed redundant extra M-step after convergence for models without expert covariates.
+* Removed redundant & erroneous `resid` & `residuals` args. to `as.Mclust` & `MoE_gpairs`.
+* `MoE_plotCrit`, `MoE_plotGate` & `MoE_plotLogLik` now invisibly return revelant quantities.
+* Corrected degrees of freedom calculation for `G=0` models when `noise.init` is not supplied.
+* Fixed `drop_levels` to handle alphanumeric variable names and ordinal variables.
+* Fixed `MoE_compare` when a mix of models with and without a noise component are supplied.
+* Fixed `MoE_compare` when optimal model has to be re-fit due to mismatched `criterion`.
+* Fixed y-axis labelling of `MoE_Uncertainty` plots.
+* `print.MoECompare` now has a `digits` arg. to control rounding of printed output.
+* Better handling of tied model-selection criteria values in `MoE_clust` & `MoE_compare`.
+* Interactions and higher-order terms are now accounted for within `drop_constants`.
+* Replaced certain instances of `is.list(x)` with `inherits(x, "list")` for stricter checking.
+* Added extra checks for invalid gating &/or expert covariates within `MoE_clust`.
+* Added `mclust::clustCombi/clustCombiOptim` examples to `as.Mclust` documentation.
+* Added extra precautions for empty clusters: during initialisation & during EM.
+* Added utility function `MoE_news` for accessing this `NEWS` file.
+* Added message if optimum `G` is at either end of the range considered.
+* Tidied indentation/line-breaks for `cat`/`message`/`warning` calls for printing clarity.
+* Added line-breaks to `usage` sections of multi-argument functions.
+* Corrected `MoEClust-package` help file (formerly just `MoEClust`).
+* Many documentation clarifications.
 
 ## MoEClust v1.1.0 - (_2<sup>nd</sup> release [minor update]: 2018-02-06_)
 ### New Features & Improvements

@@ -4,17 +4,19 @@
 \alias{MoE_dens}
 \title{Density for MoEClust Mixture Models}
 \usage{
-MoE_dens(modelName, data, mus, sigs, log.tau = 0, Vinv = NULL,
-  logarithm = TRUE)
+MoE_dens(data,
+         mus,
+         sigs,
+         log.tau = 0L,
+         Vinv = NULL,
+         logarithm = TRUE)
 }
 \arguments{
-\item{modelName}{A character string indicating the model. The help file for \code{\link[mclust]{mclustModelNames}} describes the available models.}
-
 \item{data}{If there are no expert network covariates, \code{data} should be a numeric matrix or data frame, wherein rows correspond to observations (n) and columns correspond to variables (d). If there are expert network covariates, this should be a list of length G containing matrices/data.frames of (multivariate) WLS residuals for each component.}
 
-\item{mus}{The mean for each of G components. If there is more than one component, this is a matrix whose k-th column is the mean of the k-th component of the mixture model. For the univariate models, this is a G-vector of means. In the presence of expert network covariates, all values should be equal to zero.}
+\item{mus}{The mean for each of G components. If there is more than one component, this is a matrix whose k-th column is the mean of the k-th component of the mixture model. For the univariate models, this is a G-vector of means. In the presence of expert network covariates, all values should be equal to \code{0}.}
 
-\item{sigs}{A list of length G of variance parameters of the model. The components of this list depend on the specification of \code{modelName}.}
+\item{sigs}{The \code{variance} component in the parameters list from the output to eg. \code{\link{MoE_clust}}. The components of this list depend on the specification of \code{modelName} (see \code{\link[mclust]{mclustVariance}} for details). The number of components \code{G}, the number of variables \code{d}, and the \code{modelName} are inferred from \code{sigs}.}
 
 \item{log.tau}{If covariates enter the gating network, an n times G matrix of mixing proportions, otherwise a G-vector of mixing proportions for the components of the mixture. \strong{Must} be on the log-scale in both cases. The default of \code{0} effectively means densities (or log-densities) aren't scaled by the mixing proportions.}
 
@@ -23,33 +25,36 @@ MoE_dens(modelName, data, mus, sigs, log.tau = 0, Vinv = NULL,
 \item{logarithm}{A logical value indicating whether or not the logarithm of the component densities should be returned. This defaults to \code{TRUE}, otherwise component densities are returned, obtained from the component log-densities by exponentiation. The \strong{log}-densities can be passed to \code{\link{MoE_estep}}.}
 }
 \value{
-A numeric matrix whose \code{[i,k]}-th entry is the density or log-density of observation \emph{i} in component \emph{k}, scaled by the mixing proportions.
+A numeric matrix whose \code{[i,k]}-th entry is the density or log-density of observation \emph{i} in component \emph{k}, scaled by the mixing proportions. These densities are unnormalised.
 }
 \description{
 Computes densities (or log-densities) of observations in MoEClust mixture models.
 }
 \note{
-This function is intended for joint use with \code{\link{MoE_estep}}, using the \strong{log}-densities.
+This function is intended for joint use with \code{\link{MoE_estep}}, using the \strong{log}-densities. Note that models with a noise component are facilitated here too.
 }
 \examples{
 data(ais)
 hema  <- ais[,3:7]
-model <- MoE_clust(hema, G=3, gating= ~ BMI + sex, model="EEE", network.data=ais)
-Dens  <- MoE_dens(modelName=model$modelName, data=hema,
-                  mus=model$parameters$mean, sigs=model$parameters$variance$sigma,
-                  log.tau=log(model$parameters$pro))
+model <- MoE_clust(hema, G=3, gating= ~ BMI + sex, modelNames="EEE", network.data=ais)
+Dens  <- MoE_dens(data=hema, mus=model$parameters$mean,
+                  sigs=model$parameters$variance, log.tau=log(model$parameters$pro))
 
 # Construct the z matrix and compute the log-likelihood
 Estep <- MoE_estep(Dens=Dens)
 (ll   <- Estep$loglik)
 
-# The z matrix will be close but not exactly the same as that from the model
-# as the EM algorithm finishes on an M-step, but the classification should be
+# Check that the z matrix & classification are the same as those from the model
 identical(max.col(Estep$z), as.integer(unname(model$classification))) #TRUE
-round(sum(Estep$z - model$z), options()$digits) == 0                  #TRUE
+identical(Estep$z, model$z)                                           #TRUE
+
+# The same can be done for models with expert covariates
+m2    <- MoE_clust(hema, G=2, expert= ~ sex, modelNames="EVE", network.data=ais)
+Dens2 <- MoE_dens(data=m2$resid.data, sigs=m2$parameters$variance,
+                  mus=0, log.tau=log(m2$parameters$pro))
 }
 \seealso{
-\code{\link{MoE_estep}}, \code{\link{MoE_clust}}, \code{\link[mclust]{mclustModelNames}}
+\code{\link{MoE_estep}}, \code{\link{MoE_clust}}, \code{\link[mclust]{mclustModelNames}}, \code{\link[mclust]{mclustVariance}}
 }
 \author{
 Keefe Murphy - <\email{keefe.murphy@ucd.ie}>

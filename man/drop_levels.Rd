@@ -4,7 +4,8 @@
 \alias{drop_levels}
 \title{Drop unused factor levels to predict from unseen data}
 \usage{
-drop_levels(fit, newdata)
+drop_levels(fit,
+            newdata)
 }
 \arguments{
 \item{fit}{A fitted \code{\link[stats]{lm}} model.}
@@ -15,7 +16,7 @@ drop_levels(fit, newdata)
 A \code{data.frame} like \code{newdata} with unseen factor levels replaced by \code{NA}.
 }
 \description{
-Drops unseen factor levels in \code{new.data} for which predictions are required from a \code{\link[stats]{lm}} model \code{fit}.
+Drops unseen factor levels in \code{newdata} for which predictions are required from a \code{\link[stats]{lm}} model \code{fit}.
 }
 \note{
 This function is untested for models other than \code{\link[stats]{lm}}.
@@ -38,6 +39,9 @@ inherits(pred1, "try-error") #TRUE
 pred2 <- try(predict(mod, newdata=drop_levels(mod, ais)), silent=TRUE)
 inherits(pred2, "try-error") #FALSE
 anyNA(pred2)                 #TRUE
+}
+\seealso{
+\code{\link{drop_constants}}
 }
 \author{
 Keefe Murphy - <\email{keefe.murphy@ucd.ie}>
