@@ -1,8 +1,8 @@
 #' MoEClust: Gaussian Parsimonious Clustering Models with Covariates
 #'
-#' Clustering via parsimonious Gaussian Mixtures of Experts using the \emph{MoEClust} models introduced by Murphy and Murphy (2017) <\href{https://arxiv.org/abs/1711.05632}{arXiv:1711.05632}>. This package fits finite Gaussian mixture models with gating and/or expert network covariates using a range of parsimonious covariance parameterisations via the EM algorithm. Visualisation of the results of such models using generalised pairs plots is also facilitated.
+#' Clustering via parsimonious Gaussian Mixtures of Experts using the \emph{MoEClust} models introduced by Murphy and Murphy (2017) <\href{https://arxiv.org/abs/1711.05632}{arXiv:1711.05632}>. This package fits finite Gaussian mixture models with gating and/or expert network covariates using a range of parsimonious covariance parameterisations via the EM/CEM algorithm. Visualisation of the results of such models using generalised pairs plots is also facilitated.
 #' @section Usage:
-#' The most important function in the \pkg{MoEClust} package is: \code{\link{MoE_clust}}, for fitting the model via EM with gating and/or expert network covariates, supplied via formula interfaces.
+#' The most important function in the \pkg{MoEClust} package is: \code{\link{MoE_clust}}, for fitting the model via EM/CEM with gating and/or expert network covariates, supplied via formula interfaces.
 #'
 #' Other functions also exist, e.g. \code{\link{MoE_control}}, \code{\link{MoE_crit}}, \code{\link{MoE_dens}}, \code{\link{MoE_estep}}, \code{\link{MoE_compare}}, and \code{\link{aitken}}, which are all used within \code{\link{MoE_clust}} but are nonetheless made available for standalone use.
 #'
@@ -20,8 +20,8 @@
 #' \itemize{
 #' \item{Type: }{Package}
 #' \item{Package: }{MoEClust}
-#' \item{Version: }{1.2.0}
-#' \item{Date: }{2018-08-24 (this version), 2017-11-28 (original release)}
+#' \item{Version: }{1.2.1}
+#' \item{Date: }{2018-12-11 (this version), 2017-11-28 (original release)}
 #' \item{Licence: }{GPL (>=2)}
 #' }
 #'
