@@ -1,7 +1,51 @@
-__MoEClust: Gaussian Parsimonious Clustering Models -__   
+__MoEClust: Gaussian Parsimonious Clustering Models__   
 =======================================================
-__with Gating and Expert Network Covariates__  
+__with Gating and Expert Network Covariates__ 
 =======================================================
+__and a Noise Component__
+=======================================================
+
+## MoEClust v1.2.2 - (_5<sup>th</sup> release [minor update]: 2019-05-15_)
+### New Features, Improvements, Bug Fixes & Miscellaneous Edits
+* `noise_vol` now also returns the location of the centre of mass of the region  
+  used to estimate the hypervolume, regardless of the method employed. This fixes:    
+    * `predict.MoEClust` for any models with a noise component (see below).
+    * The summary of means for models with expert covariates and a noise component.
+    * The location of the MVN ellipses for such models in `MoE_gpairs` (see below).
+* Furthermore, calculation of the hypervolume in `noise_vol` for data with >2 dimensions  
+  is now correct when `method="ellipsoidhull"`, owing to a bug in the `cluster` package.
+* Other fixes and speed-ups for the `MoE_gpairs` plotting function:  
+    * Added arg. `expert.covar` (& also to `as.Mclust` function).
+    * Fixed location of MVN ellipses for models with noise & expert covariates (see above).
+    * Fixes when `response.type="density"` for all models with a noise component.
+    * Speed-up when `response.type="density"` for models with covariates of any kind.
+    * Fixes to labelling for models with a noise component.
+    * Fixed handling of `subset$data.ind` & `subset$cov.ind` arguments.
+    * Barcode type plots now have colour for panels involving the MAP classification.
+    * Barcode type plots now respect the arg. `buffer`.
+    * Use of colour in `MoE_plotGate` is now consistent with `MoE_gpairs`.
+* Fixes to how `gating` & `expert` formulas are handled:  
+    * Allowed specification of formulas with dropped variables of the form `~.-a-b`.
+    * Allowed formulas with no intercept of the form `~c-1`.
+    * Allowed interaction effects, transformations and higher-order terms using `I()`.
+    * Small related fixes to `drop_levels` & `drop_constants` functions.  
+* `MoE_compare` gains arg. `noise.vol` for overriding the `noise.meth` arg.:  
+  this allows specifying an improper uniform density directly via the (hyper)volume,  
+  & hence adding noise to models for high-dimensional data for which `noise_vol()` fails.
+* Fixed bug for `equalPro` models with noise component, and also added `equalNoise` arg.  
+  to `MoE_control`, further controlling `equalPro` in the presence of a noise component.
+* Fixes to `predict.MoEClust` for the following special cases:  
+    * Fixes for any models with a noise component (see `noise_vol` comment above).
+    * Accounted for predictions of single observations for models with a noise component.
+    * Accounted for models with equal mixing proportions.
+* Accounted for categorical covariates in the `x.axis` arg. to `MoE_plotGate`.
+* `tau0` can now also be supplied as a vector in the presence of gating covariates.
+* Fix to `expert_covar` for univariate models. 
+* Slight `MoE_estep` speed-up due to removal of unnecessary `sweep()`.
+* Small fixes for when `clustMD` is invoked, and added `snow` package to `Suggests:`.
+* The `nnet` arg. `MaxNWts` now passable to gating network `multinom` call via `MoE_control`.
+* Improved printing of output and handling of ties, especially for `MoE_compare`.
+* Many documentation and vignette improvements.
 
 ## MoEClust v1.2.1 - (_4<sup>th</sup> release [patch update]: 2018-12-11_)
 ### New Features, Improvements, Bug Fixes & Miscellaneous Edits
@@ -10,11 +54,10 @@ __with Gating and Expert Network Covariates__
     * Extra `algo` option `"cemEM"` allows running EM starting from convergence of CEM.
 * Added `LOGLIK` to `MoE_clust` output, giving maximal log-likelihood values for all fitted models.
     * Behaves exactly as per `DF/ITERS`, etc., with associated printing/plotting functions.
-    * Edited `MoE_compare`, `summary.MoEClust`, and `MoE_plotCrit` accordingly.
+    * Edited `MoE_compare`, `summary.MoEClust`, & `MoE_plotCrit` accordingly.
 * New `MoE_control` arg. `nstarts` allows for multiple random starts when `init.z="random"`.
 * New `MoE_control` arg. `tau0` provides another means of initialising the noise component.
 * If `clustMD` is invoked for initialisation, models are now run more quickly in parallel.
-* Allowed `gating` and `expert` formulas without intercept terms (`drop_constants` also edited).
 * `MoE_plotGate` now allows a user-specified x-axis against which mixing proportions are plotted.
 * Fixed bug in checking for strictly increasing log-likelihood estimates.
 
@@ -55,7 +98,7 @@ __with Gating and Expert Network Covariates__
 * `subset` arg. to `MoE_gpairs` now allows `data.ind=0` or `cov.ind=0`, allowing plotting of  
   response variables or plotting of the covariates to be suppressed entirely.
 * Clarified MVN ellipses in `MoE_gpairs` plots.
-* `sigs` arg. to `MoE_dens` and `MoE_estep` must now be a variance object, as per `variance`  
+* `sigs` arg. to `MoE_dens` & `MoE_estep` must now be a variance object, as per `variance`  
   in the  parameters list from `MoE_clust` & `mclust` output, the number of  clusters `G`,  
   variables `d` & `modelName` is inferred from this object: the arg. `modelName` was removed.
 * `MoE_clust` no longer returns an error if `init.z="mclust"` when no gating/expert network  

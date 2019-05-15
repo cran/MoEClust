@@ -1,6 +1,6 @@
-#' MoEClust: Gaussian Parsimonious Clustering Models with Covariates
+#' MoEClust: Gaussian Parsimonious Clustering Models with Covariates and a Noise Component
 #'
-#' Clustering via parsimonious Gaussian Mixtures of Experts using the \emph{MoEClust} models introduced by Murphy and Murphy (2017) <\href{https://arxiv.org/abs/1711.05632}{arXiv:1711.05632}>. This package fits finite Gaussian mixture models with gating and/or expert network covariates using a range of parsimonious covariance parameterisations via the EM/CEM algorithm. Visualisation of the results of such models using generalised pairs plots is also facilitated.
+#' Clustering via parsimonious Gaussian Mixtures of Experts using the \emph{MoEClust} models introduced by Murphy and Murphy (2018) <\href{https://arxiv.org/abs/1711.05632}{arXiv:1711.05632}>. This package fits finite Gaussian mixture models with gating and/or expert network covariates using a range of parsimonious covariance parameterisations from the GPCM family via the EM/CEM algorithm. Visualisation of the results of such models using generalised pairs plots and the inclusion of an additional noise component is also facilitated.
 #' @section Usage:
 #' The most important function in the \pkg{MoEClust} package is: \code{\link{MoE_clust}}, for fitting the model via EM/CEM with gating and/or expert network covariates, supplied via formula interfaces.
 #'
@@ -20,8 +20,8 @@
 #' \itemize{
 #' \item{Type: }{Package}
 #' \item{Package: }{MoEClust}
-#' \item{Version: }{1.2.1}
-#' \item{Date: }{2018-12-11 (this version), 2017-11-28 (original release)}
+#' \item{Version: }{1.2.2}
+#' \item{Date: }{2019-05-15 (this version), 2017-11-28 (original release)}
 #' \item{Licence: }{GPL (>=2)}
 #' }
 #'
@@ -33,7 +33,7 @@
 #' Keefe Murphy [aut, cre], Thomas Brendan Murphy [ctb]
 #'
 #' \strong{Maintainer}: Keefe Murphy - <\email{keefe.murphy@@ucd.ie}>
-#' @references K. Murphy and T. B. Murphy (2017). Parsimonious Model-Based Clustering with Covariates. \emph{To appear}. <\href{https://arxiv.org/abs/1711.05632}{arXiv:1711.05632}>.
+#' @references K. Murphy and T. B. Murphy (2018). Gaussian Parsimonious Clustering Models with Covariates. \emph{To appear}. <\href{https://arxiv.org/abs/1711.05632}{arXiv:1711.05632}>.
 #' @examples
 #' \dontrun{
 #' data(ais)
@@ -42,13 +42,16 @@
 #' plot(res, what="gpairs")
 #'
 #' data(CO2data)
-#' GNP   <- CO2data[,1]
-#' CO2   <- CO2data[,2]
-#' m1    <- MoE_clust(CO2, G=1:2)
-#' m2    <- MoE_clust(CO2, G=2, gating= ~ GNP)
-#' m3    <- MoE_clust(CO2, G=1:2, expert= ~ GNP)
-#' m4    <- MoE_clust(CO2, G=2, gating= ~ GNP, expert= ~ GNP)
-#' MoE_compare(m1, m2, m3, m4)}
+#' CO2   <- CO2data$CO2
+#' GNP   <- CO2data$GNP
+#' 
+#' m1    <- MoE_clust(CO2, G=1:3)
+#' m2    <- MoE_clust(CO2, G=2:3, gating= ~ GNP)
+#' m3    <- MoE_clust(CO2, G=1:3, expert= ~ GNP)
+#' m4    <- MoE_clust(CO2, G=2:3, gating= ~ GNP, expert= ~ GNP)
+#' m5    <- MoE_clust(CO2, G=2:3, equalPro=TRUE)
+#' m6    <- MoE_clust(CO2, G=2:3, expert= ~ GNP, equalPro=TRUE)
+#' MoE_compare(m1, m2, m3, m4, m5, m6)}
 #' @docType package
 #' @keywords package
 "_PACKAGE"
@@ -56,9 +59,9 @@
 .onAttach <- function(lib, pkg) {
   version <- read.dcf(file.path(lib, pkg, "DESCRIPTION"), "Version")
   if(interactive()) {
-    packageStartupMessage(paste("\n___  ___      _____ _____ _           _   \n|  \\/  |     |  ___/  __ \\ |         | |     Gaussian Parsimonious\n| .  . | ___ | |__ | /  \\/ |_   _ ___| |_        Clustering Models\n| |\\/| |/ _ \\|  __|| |   | | | | / __| __|         with Covariates\n| |  | | (_) | |___| \\__/\\ | |_| \\__ \\ |_ \n\\_|  |_/\\___/\\____/ \\____/_|\\__,_|___/\\__|           version", version, "\n"))
+    packageStartupMessage(paste("\n___  ___      _____ _____ _           _   \n|  \\/  |     |  ___/  __ \\ |         | |     Gaussian Parsimonious \n| .  . | ___ | |__ | /  \\/ |_   _ ___| |_   Clustering Models with\n| |\\/| |/ _ \\|  __|| |   | | | | / __| __|        Covariates and a\n| |  | | (_) | |___| \\__/\\ | |_| \\__ \\ |_          Noise Component.\n\\_|  |_/\\___/\\____/ \\____/_|\\__,_|___/\\__|           version", version, "\n"))
   } else   {
     packageStartupMessage("\nPackage 'MoEClust' version ", version, ".")
   }
-  packageStartupMessage(paste("Type '?MoEClust' to see a brief guide to how to use this R package.\nType", sQuote(paste0("citation(", dQuote("MoEClust"),")")) ,"for citing the package in publications.\nType 'MoE_news()' to see new features recent changes and bug fixes.\n"))
+    packageStartupMessage(paste("Type '?MoEClust' to see a brief guide to how to use this R package.\nType", sQuote(paste0("citation(", dQuote("MoEClust"),")")) ,"for citing the package in publications.\nType 'MoE_news()' to see new features recent changes and bug fixes.\n"))
 }

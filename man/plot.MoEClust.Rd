@@ -44,10 +44,10 @@ res <- MoE_clust(ais[,3:7], gating= ~ BMI, expert= ~ sex,
                  G=2, modelNames="EVE", network.data=ais)
 
 # Plot the gating network
-plot(res, what="gating")
+plot(res, what="gating", x.axis=ais$BMI, type="p", xlab="BMI", pch=1)
 
 # Plot the log-likelihood
-plot(res, what="loglik")
+plot(res, what="loglik", col="blue")
 
 # Plot the uncertainty profile
 plot(res, what="uncertainty", type="profile")
@@ -60,7 +60,7 @@ plot(res, what="gpairs", response.type="density",
      scatter.type="ci", jitter=FALSE, show.counts=FALSE)}
 }
 \references{
-K. Murphy and T. B. Murphy (2017). Parsimonious Model-Based Clustering with Covariates. \emph{To appear}. <\href{https://arxiv.org/abs/1711.05632}{arXiv:1711.05632}>.
+K. Murphy and T. B. Murphy (2018). Gaussian Parsimonious Clustering Models with Covariates. \emph{To appear}. <\href{https://arxiv.org/abs/1711.05632}{arXiv:1711.05632}>.
 }
 \seealso{
 \code{\link{MoE_clust}}, \code{\link{MoE_gpairs}}, \code{\link{MoE_plotGate}}, \code{\link{MoE_plotCrit}}, \code{\link{MoE_plotLogLik}}, \code{\link{MoE_Uncertainty}}, \code{\link{as.Mclust}}, \code{\link[mclust]{plot.Mclust}}

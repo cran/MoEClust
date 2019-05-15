@@ -20,7 +20,7 @@ MoE_dens(data,
 
 \item{log.tau}{If covariates enter the gating network, an n times G matrix of mixing proportions, otherwise a G-vector of mixing proportions for the components of the mixture. \strong{Must} be on the log-scale in both cases. The default of \code{0} effectively means densities (or log-densities) aren't scaled by the mixing proportions.}
 
-\item{Vinv}{An estimate of the reciprocal hypervolume of the data region. The default is determined by applying the function \code{\link[mclust]{hypvol}} to the data. Used only if an initial guess as to which observations are noise is supplied. Mixing proportion(s) must be included for the noise component also.}
+\item{Vinv}{An estimate of the reciprocal hypervolume of the data region. See the function \code{\link{noise_vol}}. Used only if an initial guess as to which observations are noise is supplied. Mixing proportion(s) must be included for the noise component also.}
 
 \item{logarithm}{A logical value indicating whether or not the logarithm of the component densities should be returned. This defaults to \code{TRUE}, otherwise component densities are returned, obtained from the component log-densities by exponentiation. The \strong{log}-densities can be passed to \code{\link{MoE_estep}} or \code{\link{MoE_cstep}}.}
 }
@@ -48,10 +48,11 @@ Estep <- MoE_estep(Dens=Dens)
 identical(max.col(Estep$z), as.integer(unname(model$classification))) #TRUE
 identical(Estep$z, model$z)                                           #TRUE
 
-# The same can be done for models with expert covariates
-m2    <- MoE_clust(hema, G=2, expert= ~ sex, modelNames="EVE", network.data=ais)
-Dens2 <- MoE_dens(data=m2$resid.data, sigs=m2$parameters$variance,
-                  mus=0, log.tau=log(m2$parameters$pro))
+# The same can be done for models with expert covariates &/or a noise component
+# Note for models with expert covariates that the mean has to be supplied as 0
+m2    <- MoE_clust(hema, G=2, expert= ~ sex, modelNames="EVE", network.data=ais, tau0=0.1)
+Dens2 <- MoE_dens(data=m2$resid.data, sigs=m2$parameters$variance, mus=0, 
+                  log.tau=log(m2$parameters$pro), Vinv=m2$parameters$Vinv)
 }
 \seealso{
 \code{\link{MoE_estep}}, \code{\link{MoE_cstep}}, \code{\link{MoE_clust}}, \code{\link[mclust]{mclustVariance}}

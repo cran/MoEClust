@@ -20,7 +20,7 @@ MoE_estep(data,
 
 \item{log.tau}{If covariates enter the gating network, an n times G matrix of mixing proportions, otherwise a G-vector of mixing proportions for the components of the mixture. \strong{Must} be on the log-scale in both cases. The default of \code{0} effectively means densities (or log-densities) aren't scaled by the mixing proportions.}
 
-\item{Vinv}{An estimate of the reciprocal hypervolume of the data region. The default is determined by applying the function \code{\link[mclust]{hypvol}} to the data. Used only if an initial guess as to which observations are noise is supplied. Mixing proportion(s) must be included for the noise component also.}
+\item{Vinv}{An estimate of the reciprocal hypervolume of the data region. See the function \code{\link{noise_vol}}. Used only if an initial guess as to which observations are noise is supplied. Mixing proportion(s) must be included for the noise component also.}
 
 \item{Dens}{(Optional) A numeric matrix whose \code{[i,k]}-th entry is the \strong{log}-density of observation \emph{i} in component \emph{k}, scaled by the mixing proportions, to which the softmax function is to be applied, typically obtained by \code{\link{MoE_dens}} but this is not necessary. If this is supplied, all other arguments are ignored, otherwise \code{\link{MoE_dens}} is called according to the other supplied arguments.}
 }
@@ -57,10 +57,11 @@ Estep2 <- MoE_estep(data=hema, sigs=model$parameters$variance,
                     mus=model$parameters$mean, log.tau=log(model$parameters$pro))
 identical(Estep2$loglik, ll)                                          #TRUE
 
-# The same can be done for models with expert covariates
-m2     <- MoE_clust(hema, G=2, expert= ~ sex, modelNames="EVE", network.data=ais)
-Estep3 <- MoE_estep(data=m2$resid.data, sigs=m2$parameters$variance,
-                    mus=0, log.tau=log(m2$parameters$pro))
+# The same can be done for models with expert covariates &/or a noise component
+# Note for models with expert covariates that the mean has to be supplied as 0
+m2     <- MoE_clust(hema, G=2, expert= ~ sex, modelNames="EVE", network.data=ais, tau0=0.1)
+Estep3 <- MoE_estep(data=m2$resid.data, sigs=m2$parameters$variance, mus=0, 
+                    log.tau=log(m2$parameters$pro), Vinv=m2$parameters$Vinv)
 }
 \seealso{
 \code{\link{MoE_dens}}, \code{\link{MoE_clust}}, \code{\link{MoE_cstep}}, \code{\link{MoE_control}}, \code{\link[mclust]{mclustVariance}}, \code{\link[matrixStats]{rowLogSumExps}}

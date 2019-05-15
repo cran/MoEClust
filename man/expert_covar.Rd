@@ -23,8 +23,8 @@ The \code{modelName} of the resulting \code{variance} object may not correspond 
 }
 \examples{
 data(ais)
-res   <- MoE_clust(ais[,3:7], G=2, gating= ~ BMI, expert= ~ sex,
-                   network.data=ais, modelNames="EVE")
+res   <- MoE_clust(ais[,3:7], G=2, gating= ~ 1, expert= ~ sex,
+                   network.data=ais, modelNames="EEE", equalPro=TRUE)
 
 # Extract the variance object
 res$parameters$variance
@@ -33,7 +33,7 @@ res$parameters$variance
 expert_covar(res)
 }
 \references{
-K. Murphy and T. B. Murphy (2017). Parsimonious Model-Based Clustering with Covariates. \emph{To appear}. <\href{https://arxiv.org/abs/1711.05632}{arXiv:1711.05632}>.
+K. Murphy and T. B. Murphy (2018). Gaussian Parsimonious Clustering Models with Covariates. \emph{To appear}. <\href{https://arxiv.org/abs/1711.05632}{arXiv:1711.05632}>.
 }
 \seealso{
 \code{\link{MoE_clust}}, \code{\link{MoE_gpairs}}, \code{\link{plot.MoEClust}}, \code{\link{as.Mclust}}
