@@ -13,25 +13,30 @@ MoE_compare(...,
 \method{print}{MoECompare}(x,
       index = seq_len(x$pick),
       digits = 3L,
+      details = TRUE, 
       ...)
 }
 \arguments{
-\item{...}{One or more objects of class \code{"MoEClust"} outputted by \code{\link{MoE_clust}}. All models must have been fit to the same data set. A single \emph{named} list of such objects can also be supplied. This argument is only relevant for the \code{\link{MoE_compare}} function and will be ignored for the associated \code{print} function.}
+\item{...}{One or more objects of class \code{"MoEClust"} outputted by \code{\link{MoE_clust}}. All models must have been fit to the same data set. A single \emph{named} list of such objects can also be supplied. Additionally, objects of class \code{"MoECompare"} outputted by this very function can also be supplied here.
+
+This argument is only relevant for the \code{\link{MoE_compare}} function and will be ignored for the associated \code{print} function.}
 
 \item{criterion}{The criterion used to determine the ranking. Defaults to \code{"bic"}.}
 
 \item{pick}{The (integer) number of models to be ranked and compared. Defaults to \code{10L}. Will be constrained by the number of models within the \code{"MoEClust"} objects supplied via \code{...} if \code{optimal.only} is \code{FALSE}, otherwise constrained simply by the number of \code{"MoEClust"} objects supplied. Setting \code{pick=Inf} is a valid way to select all models.}
 
-\item{optimal.only}{Logical indicating whether to only rank models already deemed optimal within each \code{"MoEClust"} object (\code{TRUE}), or to allow models which were deemed suboptimal enter the final ranking (\code{FALSE}, the default). See \code{details}}
+\item{optimal.only}{Logical indicating whether to only rank models already deemed optimal within each \code{"MoEClust"} object (\code{TRUE}), or to allow models which were deemed suboptimal enter the final ranking (\code{FALSE}, the default). See \code{details}.}
 
-\item{x, index, digits}{Arguments required for the associated \code{print} function:
+\item{x, index, digits, details}{Arguments required for the associated \code{print} function:
 \describe{
 \item{\code{x}}{An object of class \code{"MoECompare"} resulting from a call to \code{\link{MoE_compare}}.}
 \item{\code{index}}{A logical or numeric vector giving the indices of the rows of the table of ranked models to print. This defaults to the full set of ranked models. It can be useful when the table of ranked models is large to examine a subset via this \code{index} argument, for display purposes.}
-\item{\code{digits}}{The number of decimal places to round model selection criteria to (defaults to 3).}}}
+\item{\code{digits}}{The number of decimal places to round model selection criteria to (defaults to 3).}
+\item{\code{details}}{Logical indicating whether some additional details should be printed, defaults to \code{TRUE}. Exists to facilitate \code{\link{MoE_stepwise}} printing.}}}
 }
 \value{
 A list of class \code{"MoECompare"}, for which a dedicated print function exists, containing the following elements (each of length \code{pick}, and ranked according to \code{criterion}, where appropriate):
+\item{\code{data}}{The name of the data set to which the models were fitted.}
 \item{\code{optimal}}{The single optimal model (an object of class \code{"MoEClust"}) among those supplied, according to the chosen \code{criterion}.}
 \item{\code{pick}}{The final number of ranked models. May be different (i.e. less than) the supplied \code{pick} value.}
 \item{\code{MoENames}}{The names of the supplied \code{"MoEClust"} objects.}
@@ -48,12 +53,12 @@ A list of class \code{"MoECompare"}, for which a dedicated print function exists
 \item{\code{algo}}{The algorithm used for fitting the model - either \code{"EM"}, \code{"CEM"}, \code{"cemEM"}.}
 \item{\code{equalPro}}{Logical indicating whether mixing proportions were constrained to be equal across components.}
 \item{\code{hypvol}}{Hypervolume parameters for the noise component if relevant, otherwise set to \code{NA} (see \code{\link{MoE_control}}).}
-\item{\code{noise}}{Either a logical indicating the presence/absence of a noise component, or the type of noise component fitted (if any). Depends on the supplied value of \code{noise}. Only displayed if at least one of the compared models has a noise component.}
-\item{\code{noise.gate}}{Logical indicating whether gating covariates were allowed to influence the noise component's mixing proportion. Only printed for models with a noise component, when at least one of the compared models has gating covariates, and even then only when \code{noise} is supplied as \code{TRUE}.}
+\item{\code{noise}}{The type of noise component fitted (if any). Only displayed if at least one of the compared models has a noise component.}
+\item{\code{noise.gate}}{Logical indicating whether gating covariates were allowed to influence the noise component's mixing proportion. Only printed for models with a noise component, when at least one of the compared models has gating covariates.}
 \item{\code{equalNoise}}{Logical indicating whether the mixing proportion of the noise component for \code{equalPro} models is also equal (\code{TRUE}) or estimated (\code{FALSE}).}
 }
 \description{
-Takes one or more sets of MoEClust models fitted by \code{\link{MoE_clust}} and ranks them according to the BIC, ICL, or AIC. It's possible to respect the internal ranking within each set of models, or to discard models within each set which were already deemed sub-optimal. This function can help with model selection via exhaustive or stepwise searches.
+Takes one or more sets of MoEClust models fitted by \code{\link{MoE_clust}} (or \code{\link{MoE_stepwise}}) and ranks them according to the BIC, ICL, or AIC. It's possible to respect the internal ranking within each set of models, or to discard models within each set which were already deemed sub-optimal. This function can help with model selection via exhaustive or stepwise searches.
 }
 \details{
 The purpose of this function is to conduct model selection on \code{"MoEClust"} objects, fit to the same data set, with different combinations of gating/expert network covariates or different initialisation settings.
@@ -72,10 +77,12 @@ A dedicated \code{print} function exists for objects of class \code{"MoECompare"
 \code{\link{plot.MoEClust}} and \code{\link{as.Mclust}} can both also be called on objects of class \code{"MoECompare"}.
 }
 \examples{
+\dontrun{
 data(CO2data)
 CO2   <- CO2data$CO2
 GNP   <- CO2data$GNP
 
+# Fit a range of models 
 m1    <- MoE_clust(CO2, G=1:3)
 m2    <- MoE_clust(CO2, G=2:3, gating= ~ GNP)
 m3    <- MoE_clust(CO2, G=1:3, expert= ~ GNP)
@@ -85,7 +92,7 @@ m6    <- MoE_clust(CO2, G=2:3, expert= ~ GNP, equalPro=TRUE)
 m7    <- MoE_clust(CO2, G=2:3, expert= ~ GNP, tau0=0.1)
 
 # Rank only the optimal models and examine the best model
-(comp <- MoE_compare(m1, m2, m3, m4, m5, m6, m7, pick=7, optimal.only=TRUE))
+(comp <- MoE_compare(m1, m2, m3, m4, m5, m6, m7, optimal.only=TRUE))
 (best <- comp$optimal)
 (summ <- summary(best))
 
@@ -93,11 +100,22 @@ m7    <- MoE_clust(CO2, G=2:3, expert= ~ GNP, tau0=0.1)
 # Only print models with expert covariates & more than one component
 comp2 <- MoE_compare(m1, m2, m3, m4, m5, m6, m7, pick=Inf)
 print(comp2, comp2$expert != "None" & comp2$G > 1)
+
+# Conduct a stepwise search on the same data
+(mod1 <- MoE_stepwise(CO2, GNP))
+
+# Conduct another stepwise search considering models with a noise component
+(mod2 <- MoE_stepwise(CO2, GNP, noise=TRUE))
+
+# Compare both sets of results to choose the optimal model
+(best <- MoE_compare(mod1, mod2, optimal.only=TRUE)$optimal)}
 }
 \references{
-K. Murphy and T. B. Murphy (2018). Gaussian Parsimonious Clustering Models with Covariates. \emph{To appear}. <\href{https://arxiv.org/abs/1711.05632}{arXiv:1711.05632}>.
+K. Murphy and T. B. Murphy (2018). Gaussian Parsimonious Clustering Models with Covariates. \emph{To appear}. <\href{https://arxiv.org/abs/1711.05632v2}{arXiv:1711.05632v2}>.
 }
 \seealso{
+See \code{\link{MoE_stepwise}} for identifying the optimal model and its covariates via greedy forward stepwise selection.\cr
+
 \code{\link{MoE_clust}}, \code{\link[mclust]{mclustModelNames}}, \code{\link{plot.MoEClust}}, \code{\link{as.Mclust}}
 }
 \author{
