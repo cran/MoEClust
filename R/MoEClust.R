@@ -1,6 +1,6 @@
 #' MoEClust: Gaussian Parsimonious Clustering Models with Covariates and a Noise Component
 #'
-#' Clustering via parsimonious Gaussian Mixtures of Experts using the \emph{MoEClust} models introduced by Murphy and Murphy (2018) <\href{https://arxiv.org/abs/1711.05632v2}{arXiv:1711.05632v2}>. This package fits finite Gaussian mixture models with gating and/or expert network covariates using a range of parsimonious covariance parameterisations from the GPCM family via the EM/CEM algorithm. Visualisation of the results of such models using generalised pairs plots and the inclusion of an additional noise component is also facilitated.
+#' Clustering via parsimonious Gaussian Mixtures of Experts using the \emph{MoEClust} models introduced by Murphy and Murphy (2019) <\href{https://doi.org/10.1007/s11634-019-00373-8}{doi:10.1007/s11634-019-00373-8}>. This package fits finite Gaussian mixture models with gating and/or expert network covariates using a range of parsimonious covariance parameterisations from the GPCM family via the EM/CEM algorithm. Visualisation of the results of such models using generalised pairs plots and the inclusion of an additional noise component is also facilitated.
 #' @section Usage:
 #' The most important function in the \pkg{MoEClust} package is: \code{\link{MoE_clust}}, for fitting the model via EM/CEM with gating and/or expert network covariates, supplied via formula interfaces.
 #'
@@ -24,8 +24,8 @@
 #' \itemize{
 #' \item{Type: }{Package}
 #' \item{Package: }{MoEClust}
-#' \item{Version: }{1.2.3}
-#' \item{Date: }{2019-07-29 (this version), 2017-11-28 (original release)}
+#' \item{Version: }{1.2.4}
+#' \item{Date: }{2019-12-11 (this version), 2017-11-28 (original release)}
 #' \item{Licence: }{GPL (>=2)}
 #' }
 #'
@@ -37,10 +37,9 @@
 #' Keefe Murphy [aut, cre], Thomas Brendan Murphy [ctb]
 #'
 #' \strong{Maintainer}: Keefe Murphy - <\email{keefe.murphy@@ucd.ie}>
-#' @references K. Murphy and T. B. Murphy (2018). Gaussian Parsimonious Clustering Models with Covariates. \emph{To appear}. <\href{https://arxiv.org/abs/1711.05632v2}{arXiv:1711.05632v2}>.
+#' @references K. Murphy and T. B. Murphy (2019). Gaussian parsimonious clustering models with covariates and a noise component. \emph{Advances in Data Analysis and Classification}, 1-33. <\href{https://doi.org/10.1007/s11634-019-00373-8}{doi:10.1007/s11634-019-00373-8}>.
 #' @examples
-#' \dontrun{
-#' data(ais)
+#' \donttest{data(ais)
 #' 
 #' # Fit two models
 #' res1  <- MoE_clust(ais[,3:7], G=2, gating=~BMI, expert=~sex,
@@ -51,7 +50,7 @@
 #' # Compare the best model from each set of results
 #' (comp <- MoE_compare(res1, res2, optimal.only=TRUE))
 #' 
-#' # Procude a plot for the optimal model                                                   
+#' # Produce a plot for the optimal model                                                   
 #' plot(comp$optimal, what="gpairs")
 #'
 #' data(CO2data)
@@ -87,7 +86,7 @@
   if(interactive()) {
     packageStartupMessage(paste("\n___  ___      _____ _____ _           _   \n|  \\/  |     |  ___/  __ \\ |         | |     Gaussian Parsimonious \n| .  . | ___ | |__ | /  \\/ |_   _ ___| |_   Clustering Models with\n| |\\/| |/ _ \\|  __|| |   | | | | / __| __|        Covariates and a\n| |  | | (_) | |___| \\__/\\ | |_| \\__ \\ |_          Noise Component\n\\_|  |_/\\___/\\____/ \\____/_|\\__,_|___/\\__|           version", version, "\n"))
   } else   {
-    packageStartupMessage("\nPackage 'MoEClust' version ", version, ".")
+    packageStartupMessage("\nPackage ", sQuote("MoEClust"), " version ", version, ".\n")
   }
-    packageStartupMessage(paste("Type '?MoEClust' to see a brief guide to how to use this R package.\nType", sQuote(paste0("citation(", dQuote("MoEClust"),")")) ,"for citing the package in publications.\nType 'MoE_news()' to see new features recent changes and bug fixes.\n"))
+    packageStartupMessage(paste("Type", sQuote("?MoEClust"), "to see a brief guide to how to use this R package.\nType", sQuote(paste0("citation(", dQuote("MoEClust"),")")) ,"for citing the package in publications.\nType", sQuote("MoE_news()"), "to see new features recent changes and bug fixes.\n"))
 }

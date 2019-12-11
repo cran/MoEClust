@@ -43,7 +43,7 @@ When \code{init.z="mclust"} or \code{\link[clustMD]{clustMD}} is successfully in
 \item{\code{equalNoise}}{Logical which is only invoked when \code{isTRUE(equalPro)} and gating covariates are not supplied. Under the default setting (\code{FALSE}), the mixing proportion for the noise component is estimated, and remaining mixing proportions are equal; when \code{TRUE} all components, including the noise component, have equal mixing proportions.}
 \item{\code{discard.noise}}{A logical governing how the means are summarised in \code{parameters$mean} and by extension the location of the MVN ellipses in \code{\link{MoE_gpairs}} plots for models with \emph{both} expert network covariates and a noise component (otherwise this argument is irrelevant). 
 
-The means for models with expert network covariates are summarised by the posterior mean of the fitted values. By default (\code{FALSE}), the mean of the noise component is accounted for in the posterior mean. Otherwise, or when the mean of the noise component is unavailable (due to having been manually supplied via \code{noise.args$noise.vol}), the \code{z} matrix is renormalised after discarding the column corresponding to the noise component prior to computation of the posterior mean. The renormalisation approach can be forced by specifying \code{noise.args$discard.noise=TRUE}, even when the mean of the noise component is available.}
+The means for models with expert network covariates are summarised by the posterior mean of the fitted values. By default (\code{FALSE}), the mean of the noise component is accounted for in the posterior mean. Otherwise, or when the mean of the noise component is unavailable (due to having been manually supplied via \code{noise.args$noise.vol}), the \code{z} matrix is renormalised after discarding the column corresponding to the noise component prior to computation of the posterior mean. The renormalisation approach can be forced by specifying \code{noise.args$discard.noise=TRUE}, even when the mean of the noise component is available. For models with a noise component fitted with \code{algo="CEM"}, a small extra E-step is conducted for observations assigned to the non-noise components in this case.}
 }
 In particular, the argument \code{noise.meth} will be ignored for high-dimensional \code{n <= d} data, in which case the argument \code{noise.vol} \emph{must be} specified. Note that this forces \code{noise.args$discard.noise} to \code{TRUE}. See \code{\link{noise_vol}} for more details.
 
@@ -116,24 +116,30 @@ Supplies a list of arguments (with defaults) for use with \code{\link{MoE_clust}
 While the \code{criterion} argument controls the choice of the optimal number of components and GPCM/\pkg{mclust} model type, \code{\link{MoE_compare}} is provided for choosing between fits with different combinations of covariates or different initialisation settings.
 }
 \note{
-Note that successfully invoking \code{exp.init$clustMD} (though it defaults to \code{FALSE}) effects the role of the arguments \code{init.z}, \code{hc.args}, and \code{km.args}. Please read the documentation above carefully in this instance.
+Note that successfully invoking \code{exp.init$clustMD} (though it defaults to \code{FALSE}) affects the role of the arguments \code{init.z}, \code{hc.args}, and \code{km.args}. Please read the documentation above carefully in this instance.
+
+The initial allocation matrices before and after the invocation of the \code{exp.init} related arguments are both stored as attributes in the object returned by \code{\link{MoE_clust}} (named "\code{Z.init}" and "\code{Exp.init}", respectively). If \code{init.z="random"} and \code{nstarts > 1}, the allocations corresponding to the best random start are stored. This can be useful for supplying \code{z.list} for future fits.
 }
 \examples{
-\dontrun{
 ctrl1 <- MoE_control(criterion="icl", itmax=100, warn.it=15, init.z="random", nstarts=5)
 
 data(CO2data)
 GNP   <- CO2data$GNP
-res   <- MoE_clust(CO2data$CO2, G=2, expert = ~ GNP, control=ctrl1)
+\donttest{res   <- MoE_clust(CO2data$CO2, G=2, expert = ~ GNP, control=ctrl1)
 
 # Alternatively, specify control arguments directly
-res2  <- MoE_clust(CO2data$CO2, G=2, expert = ~ GNP, stopping="relative")
+res2  <- MoE_clust(CO2data$CO2, G=2, expert = ~ GNP, stopping="relative")}
 
-# Supplying ctrl1 without naming it as 'control' throws an error,
-# when any of {modelNames, gating, expert} are not supplied
-res3  <- MoE_clust(CO2data$CO2, G=2, expert = ~ GNP, ctrl1)
+# Supplying ctrl1 without naming it as 'control' can throw an error
+\dontrun{
+res3  <- MoE_clust(CO2data$CO2, G=2, expert = ~ GNP, ctrl1)}
 
-# Initialise via the mixed-type joint distribution of response & covariates
+# Similarly, supplying control arguments via a mix of the ... construct
+# and the named argument 'control' also throws an error
+\dontrun{
+res4  <- MoE_clust(CO2data$CO2, G=2, expert = ~ GNP, control=ctrl1, init.z="kmeans")}
+
+\donttest{# Initialise via the mixed-type joint distribution of response & covariates
 # Let the ICL criterion determine the optimal clustMD model type
 # Constrain the mixing proportions to be equal
 ctrl2 <- MoE_control(exp.init=list(clustMD=TRUE), init.crit="icl", equalPro=TRUE)

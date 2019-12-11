@@ -64,8 +64,7 @@ Without any prior information, it is best to accept the defaults at the expense 
 It is advised to run this function once with \code{noise=FALSE} and once with \code{noise=TRUE} and then choose the optimal model across both sets of results.
 }
 \examples{
-\dontrun{
-# data(CO2data)
+\donttest{# data(CO2data)
 # Search over all models where the single covariate can enter either network
 # (mod1 <- MoE_stepwise(CO2data$CO2, CO2data[,"GNP", drop=FALSE]))
 #
@@ -84,7 +83,7 @@ It is advised to run this function once with \code{noise=FALSE} and once with \c
 # comp$optimal}
 }
 \references{
-K. Murphy and T. B. Murphy (2018). Gaussian Parsimonious Clustering Models with Covariates. \emph{To appear}. <\href{https://arxiv.org/abs/1711.05632v2}{arXiv:1711.05632v2}>.
+K. Murphy and T. B. Murphy (2019). Gaussian parsimonious clustering models with covariates and a noise component. \emph{Advances in Data Analysis and Classification}, 1-33. <\href{https://doi.org/10.1007/s11634-019-00373-8}{doi:10.1007/s11634-019-00373-8}>.
 }
 \seealso{
 \code{\link{MoE_clust}}, \code{\link{MoE_compare}}, \code{\link{MoE_control}}

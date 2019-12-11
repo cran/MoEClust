@@ -31,14 +31,13 @@
 #' GNP and CO2 Data Set
 #'
 #' This data set gives the gross national product (GNP) per capita in 1996 for various countries as well as their estimated carbon dioxide (CO2) emission per capita for the same year.
-#'
 #' @format This data frame consists of 28 countries and the following variables:\cr
 #' \itemize{
 #' \item{\code{GNP}}{ - The gross product per capita in 1996.}
 #' \item{\code{CO2}}{ - The estimated carbon dioxide emission per capita in 1996.}
 #' \item{\code{country}}{ - An abbreviation pertaining to the country measures (e.g. \code{"GRC"} = Greece and \code{"CH"} = Switzerland).}
 #' }
-#' @references Hurn, M., Justel, A. and Robert, C. P. (2003) Estimating Mixtures of Regressions, \emph{Journal of Computational and Graphical Statistics}, 12(1): 55-79.
+#' @references Hurn, M., Justel, A. and Robert, C. P. (2003) Estimating mixtures of regressions, \emph{Journal of Computational and Graphical Statistics}, 12(1): 55-79.
 #' @examples 
 #' data(CO2data, package="MoEClust")
 #' plot(CO2data$GNP, CO2data$CO2, type="n", ylab=expression('CO'[2]))
