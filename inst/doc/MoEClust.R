@@ -42,7 +42,7 @@ comp  <- MoE_compare(m1, m2, m3, m4, m5, m6, optimal.only=TRUE)
 #  (summ <- summary(best))
 
 ## ---- echo=FALSE--------------------------------------------------------------
-(summ <- suppressMessages(summary(best)))
+(summ <- suppressWarnings(summary(best)))
 
 ## -----------------------------------------------------------------------------
 plot(best, what="gpairs", jitter=FALSE)
@@ -75,20 +75,30 @@ mod <- as.Mclust(comp$optimal)
 plot(mod, what="classification")
 plot(mod, what="uncertainty")
 
-## -----------------------------------------------------------------------------
-as.vector(predict(comp$optimal)$y)
+## ---- eval=FALSE--------------------------------------------------------------
+#  as.vector(predict(comp$optimal)$y)
+
+## ---- echo=FALSE--------------------------------------------------------------
+as.vector(suppressWarnings(predict(comp$optimal)$y))
 
 ## ---- results="hide"----------------------------------------------------------
 ind     <- sample(1:nrow(CO2data), 2)
 res2    <- MoE_clust(CO2data[-ind,]$CO2, G=3, expert=~GNP, 
                      equalPro=TRUE, network.data=CO2data[-ind,])
 
-## -----------------------------------------------------------------------------
+## ---- eval=FALSE--------------------------------------------------------------
+#  # Using new covariates only
+#  predict(res2, newdata = CO2data[ind,], use.y = FALSE)[1:3]
+#  
+#  # Using both new covariates & new response data
+#  predict(res2, newdata = CO2data[ind,])[1:3]
+
+## ---- echo=FALSE--------------------------------------------------------------
 # Using new covariates only
-predict(res2, newdata= list(new.x=CO2data[ind,"GNP", drop=FALSE])) 
+suppressWarnings(predict(res2, newdata = CO2data[ind,], use.y = FALSE)[1:3])
 
 # Using both new covariates & new response data
-predict(res2, newdata = CO2data[ind,])         
+predict(res2, newdata = CO2data[ind,])[1:3]         
 
 ## -----------------------------------------------------------------------------
 data(ais)

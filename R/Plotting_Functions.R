@@ -19,8 +19,8 @@
 #' @param addEllipses Controls whether to add MVN ellipses with axes corresponding to the within-cluster covariances for the response data (\code{"yes"} or \code{"no"}). The options \code{"inner"} and \code{"outer"} (the default) will colour the axes or the perimeter of those ellipses, respectively, according to the cluster they represent (according to \code{scatter.pars$lci.col}). The option \code{"both"} will obviously colour both the axes and the perimeter. Ellipses are only ever drawn for multivariate data, and only when \code{response.type} is \code{"points"} or \code{"uncertainty"}.
 #'
 #' Ellipses are centered on the posterior mean of the fitted values when there are expert network covariates, otherwise on the posterior mean of the response variables. In the presence of expert network covariates, the component-specific covariance matrices are also (by default, via the argument \code{expert.covar} below) modified for plotting purposes via the function \code{\link{expert_covar}}, in order to account for the extra variability of the means, usually resulting in bigger shapes & sizes for the MVN ellipses.
-#' @param expert.covar Logical (defaults to \code{TRUE}) governing whether the extra variabilitity in the component means is added to the MVN ellipses corresponding to the component covariance matrices in the presence of expert network covariates when \code{addEllipses} is invoked accordingly. See the function \code{\link{expert_covar}}. Only relevant when \code{response.type} is \code{"points"} or \code{"uncertainty"}.
-#' @param border.col A vector of length 5 (or 1) containing \emph{border} colours for plots against the MAP classification, respponse vs. response, covariate vs. response, response vs. covariate, and covariate vs. covariate panels, respectively.
+#' @param expert.covar Logical (defaults to \code{TRUE}) governing whether the extra variability in the component means is added to the MVN ellipses corresponding to the component covariance matrices in the presence of expert network covariates when \code{addEllipses} is invoked accordingly. See the function \code{\link{expert_covar}}. Only relevant when \code{response.type} is \code{"points"} or \code{"uncertainty"}.
+#' @param border.col A vector of length 5 (or 1) containing \emph{border} colours for plots against the MAP classification, response vs. response, covariate vs. response, response vs. covariate, and covariate vs. covariate panels, respectively.
 #'
 #' Defaults to \code{c("purple", "black", "brown", "brown", "navy")}.
 #' @param bg.col A vector of length 5 (or 1) containing \emph{background} colours for plots against the MAP classification, response vs. response, covariate vs. response, response vs. covariate, and covariate vs. covariate panels, respectively.
@@ -84,9 +84,9 @@
 #' \code{\link{plot.MoEClust}} is a wrapper to \code{\link{MoE_gpairs}} which accepts the default arguments, and also produces other types of plots. Caution is advised producing generalised pairs plots when the dimension of the data is large.
 #' @export
 #' @author Keefe Murphy - <\email{keefe.murphy@@ucd.ie}>
-#' @references K. Murphy and T. B. Murphy (2019). Gaussian parsimonious clustering models with covariates and a noise component. \emph{Advances in Data Analysis and Classification}, 1-33. <\href{https://doi.org/10.1007/s11634-019-00373-8}{doi:10.1007/s11634-019-00373-8}>.
+#' @references Murphy, K. and Murphy, T. B. (2019). Gaussian parsimonious clustering models with covariates and a noise component. \emph{Advances in Data Analysis and Classification}, 1-33. <\href{https://doi.org/10.1007/s11634-019-00373-8}{doi:10.1007/s11634-019-00373-8}>.
 #'
-#' Emerson, J.W., Green, W.A., Schloerke, B., Crowley, J., Cook, D., Hofmann, H. and Wickham, H. (2013). The generalized pairs plot. \emph{Journal of Computational and Graphical Statistics}, 22(1):79-91.
+#' Emerson, J. W., Green, W. A., Schloerke, B., Crowley, J., Cook, D., Hofmann, H. and Wickham, H. (2013). The generalized pairs plot. \emph{Journal of Computational and Graphical Statistics}, 22(1):79-91.
 #' @seealso \code{\link{MoE_clust}}, \code{\link{MoE_stepwise}}, \code{\link{plot.MoEClust}}, \code{\link{MoE_Uncertainty}}, \code{\link{expert_covar}}, \code{\link[lattice]{panel.stripplot}}, \code{\link[lattice]{panel.bwplot}}, \code{\link[lattice]{panel.violin}}, \code{\link[vcd]{strucplot}}
 #' @keywords plotting
 #' @usage
@@ -167,16 +167,21 @@ MoE_gpairs.MoEClust <- function(res, response.type = c("points", "uncertainty", 
   dat   <- res$data
   net   <- res$net.covs
   z     <- res$z
-  class <- res$classification
+  claSS <- res$classification
   G     <- res$G
   Gseq  <- seq_len(G)
   both  <- attr(net, "Both")
   gate  <- setdiff(attr(net, "Gating"), both)
   expx  <- setdiff(attr(net, "Expert"), both)
   if(is.null(subset$show.map)) {
-    subset$show.map <- (G + !is.na(res$hypvol)) > 1
-  } else if(length(subset$show.map) > 1  ||
-            !is.logical(subset$show.map))             stop("'subset$show.map' should be a single logical indicator", call.=FALSE)
+    subset$show.map <- ifelse(length(unique(claSS))  == 1, FALSE, (G + !is.na(res$hypvol)) > 1)
+  } else {
+    if(length(subset$show.map) > 1  ||
+       !is.logical(subset$show.map))                  stop("'subset$show.map' should be a single logical indicator", call.=FALSE)
+    if(length(unique(claSS))  == 1)       {           message("'show.map' set to FALSE as there is only one non-empty component\n")
+      subset$show.map         <- FALSE
+    }
+  }
   if(is.null(subset$data.ind)) {
     subset$data.ind <- seq_len(ncol(dat))
   } else if(length(subset$data.ind) < 1  ||
@@ -199,11 +204,11 @@ MoE_gpairs.MoEClust <- function(res, response.type = c("points", "uncertainty", 
   dat   <- dat[,subset$data.ind, drop=FALSE]
   net   <- net[,subset$cov.ind,  drop=FALSE]
   dcol  <- ncol(dat)  + subset$show.map
-  uni.c <- unique(class[class > 0])
-  class <- factor(class)
+  uni.c <- unique(claSS[claSS > 0])
+  claSS <- factor(claSS)
   x     <- if(ncol(net) == 0) as.data.frame(dat)      else cbind(dat, net)
-  x     <- if(subset$show.map) cbind(MAP  = class, x) else x
-  clust <- as.character(class)
+  x     <- if(subset$show.map) cbind(MAP  = claSS, x) else x
+  clust <- as.character(claSS)
   zc    <- function(x) length(unique(x)) <= 1L
   saxzc <- vapply(x, zc, logical(1L))
   nrm   <- sum(saxzc, na.rm=TRUE)
@@ -275,7 +280,7 @@ MoE_gpairs.MoEClust <- function(res, response.type = c("points", "uncertainty", 
   if(res$d  > 1) {
     res$parameters$varianceX    <- if(isTRUE(drawEllipses) && 
                                       isTRUE(expert.covar) &&
-                                      attr(res, "Expert")) suppressWarnings(expert_covar(res)) else res$parameters$variance
+                                      attr(res, "Expert")) suppressMessages(expert_covar(res)) else res$parameters$variance
   }
   upr.gate <- grepl("2", scatter.type[1L])
   low.gate <- grepl("2", scatter.type[2L])
@@ -312,18 +317,18 @@ MoE_gpairs.MoEClust <- function(res, response.type = c("points", "uncertainty", 
   if(length(outer.rot)  != 2    ||
     !all(is.numeric(outer.rot)) ||
      any(outer.rot       < 0))                        stop("Invalid 'outer.rot': must be a strictly non-negative numeric vector of length 2", call.=FALSE)
-  class                 <- as.integer(levels(class))[class]
-  if(any(C <- class == 0))       {
-    class0              <- factor(class, levels=c(sort(levels(factor(class)))[-1L], 0L))
-    class[which(C)]     <- G  + 1
-  } else class0         <- factor(class)
-  x[,1L]                <- if(names(x)[1L]  == "MAP") class0 else x[,1L]
+  claSS                 <- as.integer(levels(claSS))[claSS]
+  if(any(C <- claSS == 0))       {
+    claSS0              <- factor(claSS, levels=c(sort(levels(factor(claSS)))[-1L], 0L))
+    claSS[which(C)]     <- G  + 1
+  } else claSS0         <- factor(claSS)
+  x[,1L]                <- if(names(x)[1L]  == "MAP") claSS0 else x[,1L]
   if(length(gap)        != 1    || (!is.numeric(gap)    ||
      gap    < 0))                                     stop("'gap' must be single strictly non-negative number", call.=FALSE)
   if(length(buffer)     != 1    || (!is.numeric(buffer) ||
      buffer < 0))                                     stop("'buffer' must be single strictly non-negative number", call.=FALSE)
   if(is.null(scatter.pars$scat.pch))  {
-    scatter.pars$pch    <- if(response.type == "uncertainty") 19 else symbols[class]
+    scatter.pars$pch    <- if(response.type == "uncertainty") 19 else symbols[claSS]
   } else scatter.pars$pch         <- scatter.pars$scat.pch
   if(is.null(scatter.pars$scat.size)) {
     scatter.pars$size   <- grid::unit(0.25, "char")
@@ -336,7 +341,7 @@ MoE_gpairs.MoEClust <- function(res, response.type = c("points", "uncertainty", 
   if(length(scatter.pars$noise.size)   > 1 ||
      !inherits(scatter.pars$noise.size,     "unit"))  stop("'scatter.pars$noise.size' must be a single item of class 'unit'", call.=FALSE)
   if(is.null(scatter.pars$scat.col))  {
-    scatter.pars$col    <- colors[class]
+    scatter.pars$col    <- colors[claSS]
   } else scatter.pars$col    <- scatter.pars$scat.col
   if(is.null(scatter.pars$lci.col))   {
     scatter.pars$lci.col     <- colors[Gseq]
@@ -415,7 +420,7 @@ MoE_gpairs.MoEClust <- function(res, response.type = c("points", "uncertainty", 
   } else if(length(diag.pars$show.counts) > 1 ||
             !is.logical(diag.pars$show.counts))       stop("'diag.pars$show.counts' must be a single logical indicator", call.=FALSE)
   if(is.null(stripplot.pars$strip.pch)) {
-    stripplot.pars$pch  <- if(response.type   == "uncertainty" && uncert.cov) 19L else symbols[class]
+    stripplot.pars$pch  <- if(response.type   == "uncertainty" && uncert.cov) 19L else symbols[claSS]
   } else stripplot.pars$pch       <- if(response.type  == "uncertainty" && uncert.cov) 19L else stripplot.pars$strip.pch
   if(length(uncert.cov)  > 1                  ||
      !is.logical(uncert.cov))                         stop("'uncert.cov' must be a single logical indicator", call.=FALSE)
@@ -439,14 +444,14 @@ MoE_gpairs.MoEClust <- function(res, response.type = c("points", "uncertainty", 
     stripplot.pars$size <- replace(rep(stripplot.pars$size, nrow(dat)), clust == 0, stripplot.pars$size.noise)
   }
   if(is.null(stripplot.pars$strip.col))  {
-    stripplot.pars$col  <- if(response.type  == "uncertainty" && uncert.cov) uncertainty$col else colors[class]
+    stripplot.pars$col  <- if(response.type  == "uncertainty" && uncert.cov) uncertainty$col else colors[claSS]
   } else stripplot.pars$col       <- if(response.type  == "uncertainty" && uncert.cov) uncertainty$col else stripplot.pars$strip.col
   if(is.null(stripplot.pars$jitter)) {
   stripplot.pars$jitter <- TRUE
   }
   bar.col               <- FALSE
   if(is.null(barcode.pars$bar.col))  {
-    barcode.pars$col    <- colors[rev(seq_along(unique(class)))]
+    barcode.pars$col    <- colors[rev(seq_along(unique(claSS)))]
   } else {
     if(length(barcode.pars$bar.col) == 1) {
       bar.col           <- TRUE
@@ -476,8 +481,8 @@ MoE_gpairs.MoEClust <- function(res, response.type = c("points", "uncertainty", 
     mosaic.pars$shade   <- NULL
   }
   noise.cols <- scatter.pars$col
-  scatter.pars$ecol     <- unique(noise.cols[class != G + 1])[match(Gseq, uni.c)]
-  noise.cols <- unique(noise.cols)[match(if(noise) c(Gseq, G + 1) else Gseq, unique(class))]
+  scatter.pars$ecol     <- unique(noise.cols[claSS != G + 1])[match(Gseq, uni.c)]
+  noise.cols <- unique(noise.cols)[match(if(noise) c(Gseq, G + 1) else Gseq, unique(claSS))]
   grid::grid.newpage()
   vp.main    <- grid::viewport(x=outer.margins$bottom, y=outer.margins$left,
                                width=grid::unit(1,  "npc") - outer.margins$right - outer.margins$left,
@@ -680,9 +685,9 @@ MoE_plotGate.MoEClust   <- function(res, x.axis = NULL, type = "l", xlab = "Obse
 #'              criterion = c("bic", "icl", "aic", "loglik"),
 #'              ...)
 #' @examples
-#' \donttest{data(ais)
-#' res   <- MoE_clust(ais[,3:7], expert= ~ sex, network.data=ais)
-#' (crit <- MoE_plotCrit(res))}
+#' \donttest{# data(ais)
+#' # res   <- MoE_clust(ais[,3:7], expert= ~ sex, network.data=ais)
+#' # (crit <- MoE_plotCrit(res))}
 MoE_plotCrit <- function(res, criterion = c("bic", "icl", "aic", "loglik"), ...) {
     UseMethod("MoE_plotCrit")
 }
@@ -883,7 +888,7 @@ MoE_Uncertainty.MoEClust <- function(res, type = c("barplot", "profile"), truth 
 #' Other types of plots are available by first calling \code{\link{as.Mclust}} on the fitted object, and then calling \code{\link[mclust]{plot.Mclust}} on the results. These can be especially useful for univariate data.
 #' @return The visualisation according to \code{what} of the results of a fitted \code{MoEClust} model.
 #' @seealso \code{\link{MoE_clust}}, \code{\link{MoE_stepwise}}, \code{\link{MoE_gpairs}}, \code{\link{MoE_plotGate}}, \code{\link{MoE_plotCrit}}, \code{\link{MoE_plotLogLik}}, \code{\link{MoE_Uncertainty}}, \code{\link{as.Mclust}}, \code{\link[mclust]{plot.Mclust}}
-#'@references K. Murphy and T. B. Murphy (2019). Gaussian parsimonious clustering models with covariates and a noise component. \emph{Advances in Data Analysis and Classification}, 1-33. <\href{https://doi.org/10.1007/s11634-019-00373-8}{doi:10.1007/s11634-019-00373-8}>.
+#'@references Murphy, K. and Murphy, T. B. (2019). Gaussian parsimonious clustering models with covariates and a noise component. \emph{Advances in Data Analysis and Classification}, 1-33. <\href{https://doi.org/10.1007/s11634-019-00373-8}{doi:10.1007/s11634-019-00373-8}>.
 #' @author Keefe Murphy - <\email{keefe.murphy@@ucd.ie}>
 #' @export
 #' @method plot MoEClust
@@ -1241,7 +1246,7 @@ plot.MoEClust <- function(x, what=c("gpairs", "gating", "criterion", "loglik", "
   grid::popViewport(1)
 }
 
-#' @importFrom lattice "current.panel.limits" "trellis.grobname"
+#' @importFrom lattice "current.panel.limits" "trellis.grobname" "trellis.par.get"
 .violin_panel  <- function(x, y, box.ratio = 1, box.width = box.ratio/(1 + box.ratio), horizontal = TRUE, alpha = plot.polygon$alpha,
                            border = plot.polygon$border, lty = plot.polygon$lty, lwd = plot.polygon$lwd, col = plot.polygon$col,
                            varwidth = FALSE, bw = NULL, adjust = NULL, kernel = NULL, window = NULL, width = NULL, n = 50,
