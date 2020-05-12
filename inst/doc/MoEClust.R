@@ -39,7 +39,7 @@ comp  <- MoE_compare(m1, m2, m3, m4, m5, m6, optimal.only=TRUE)
 (best  <- MoE_compare(mod1, mod2, comp, pick=1)$optimal)
 
 ## ---- eval=FALSE--------------------------------------------------------------
-#  (summ <- summary(best))
+#  (summ <- summary(best, classification=TRUE, parameters=FALSE, networks=FALSE))
 
 ## ---- echo=FALSE--------------------------------------------------------------
 (summ <- suppressWarnings(summary(best)))
@@ -129,11 +129,8 @@ plot(mod, what="uncertainty", type="profile")
 ## ---- echo=FALSE--------------------------------------------------------------
 plot(mod, what="criterion", legendArgs=list(x="right"))
 
-## ---- eval=FALSE--------------------------------------------------------------
-#  plot(mod, what="gating", x.axis=ais$BMI, type="p", xlab="BMI", pch=1)
-
-## ---- echo=FALSE--------------------------------------------------------------
-plot(mod, what="gating", x.axis=ais$BMI, type="p", xlab="BMI", pch=1)
+## -----------------------------------------------------------------------------
+plot(mod, what="gating", x.axis=ais$BMI, xlab="BMI")
 
 ## ---- eval=FALSE--------------------------------------------------------------
 #  plot(mod, what="loglik")
