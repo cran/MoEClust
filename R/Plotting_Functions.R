@@ -16,7 +16,7 @@
 #' Alternatively, the bivariate \code{"density"} contours can be displayed (see \code{density.pars}), provided there is at least one Gaussian component in the model. Caution is advised when producing density plots for models with covariates in the expert network; the required number of evaluations of the (multivariate) Gaussian density for each panel (\code{res$G * prod(density.pars$grid.size)}) increases by a factor of \code{res$n}, thus plotting may be slow (particularly for large data sets).
 #' @param scatter.type A vector of length 2 (or 1) giving the plot type for the upper and lower triangular portions of the plot, respectively, pertaining to the associated covariates. Defaults to \code{"lm"} for covariate vs. response panels and \code{"points"} otherwise. Only relevant for models with continuous covariates in the gating &/or expert network. \code{"ci"} and \code{"lm"} type plots are only produced for plots pairing covariates with response, and never response vs. response or covariate vs. covariate. Note that lines &/or confidence intervals will only be drawn for continuous covariates included in the expert network; to include covariates included only in the gating network also, the options \code{"lm2"} or \code{"ci2"} can be used but this is not generally advisable.
 #' @param conditional A vector of length 2 (or 1) giving the plot type for the upper and lower triangular portions of the plot, respectively, for plots involving a mix of categorical and continuous variables. Defaults to \code{"stripplot"} in the upper triangle and \code{"boxplot"} in the lower triangle (see \code{\link[lattice]{panel.stripplot}} and \code{\link[lattice]{panel.bwplot}}). \code{"barcode"} and \code{"violin"} plots can also be produced. Only relevant for models with categorical covariates in the gating &/or expert network. Comparisons of two categorical variables (which can only ever be covariates) are always displayed via mosaic plots (see \code{\link[vcd]{strucplot}}).
-#' @param addEllipses Controls whether to add MVN ellipses with axes corresponding to the within-cluster covariances for the response data (\code{"yes"} or \code{"no"}). The options \code{"inner"} and \code{"outer"} (the default) will colour the axes or the perimeter of those ellipses, respectively, according to the cluster they represent (according to \code{scatter.pars$lci.col}). The option \code{"both"} will obviously colour both the axes and the perimeter. Ellipses are only ever drawn for multivariate data, and only when \code{response.type} is \code{"points"} or \code{"uncertainty"}.
+#' @param addEllipses Controls whether to add MVN ellipses with axes corresponding to the within-cluster covariances for the response data (\code{"yes"} or \code{"no"}). The options \code{"inner"} and \code{"outer"} (the default) will colour the axes or the perimeter of those ellipses, respectively, according to the cluster they represent (according to \code{scatter.pars$eci.col}). The option \code{"both"} will obviously colour both the axes and the perimeter. Ellipses are only ever drawn for multivariate data, and only when \code{response.type} is \code{"points"} or \code{"uncertainty"}.
 #'
 #' Ellipses are centered on the posterior mean of the fitted values when there are expert network covariates, otherwise on the posterior mean of the response variables. In the presence of expert network covariates, the component-specific covariance matrices are also (by default, via the argument \code{expert.covar} below) modified for plotting purposes via the function \code{\link{expert_covar}}, in order to account for the extra variability of the means, usually resulting in bigger shapes & sizes for the MVN ellipses.
 #' @param expert.covar Logical (defaults to \code{TRUE}) governing whether the extra variability in the component means is added to the MVN ellipses corresponding to the component covariance matrices in the presence of expert network covariates when \code{addEllipses} is invoked accordingly. See the function \code{\link{expert_covar}}. Only relevant when \code{response.type} is \code{"points"} or \code{"uncertainty"}.
@@ -29,7 +29,7 @@
 #' @param outer.margins A list of length 4 with units as components named bottom, left, top, and right, giving the outer margins; the defaults uses two lines of text. A vector of length 4 with units (ordered properly) will work, as will a vector of length 4 with numeric variables (interpreted as lines).
 #' @param outer.labels The default is \code{NULL}, for alternating labels around the perimeter. If \code{"all"}, all labels are printed, and if \code{"none"}, no labels are printed.
 #' @param outer.rot A 2-vector (\code{x}, \code{y}) rotating the top/bottom outer labels \code{x} degrees and the left/right outer labels \code{y} degrees. Only works for categorical labels of boxplot and mosaic panels. Defaults to \code{c(0, 90)}.
-#' @param gap The gap between the tiles; defaulting to 0.05 of the width of a tile.
+#' @param gap The gap between the tiles; defaulting to \code{0.05} of the width of a tile.
 #' @param buffer The fraction by which to expand the range of quantitative variables to provide plots that will not truncate plotting symbols. Defaults to \code{0.025}, i.e. 2.5 percent of the range.
 #' @param uncert.cov A logical indicating whether the expansion factor for points on plots involving covariates should also be modified when \code{response.type="uncertainty"}. Defaults to \code{FALSE}, and only relevant for scatterplot and stripplot panels.
 #' @param scatter.pars A list supplying select parameters for the continuous vs. continuous scatter plots.
@@ -37,8 +37,8 @@
 #' \code{NULL} is equivalent to:
 #' \preformatted{list(scat.pch=if(response.type == "uncertainty") 19 else res$classification,
 #' scat.size=unit(0.25, "char"), scat.col=res$classification, 
-#' lci.col=res$classification, noise.size=unit(0.2, "char")),}
-#' where \code{lci.col} gives the colour of the fitted lines &/or confidence intervals when \code{scatter.type} is one of \code{"ci"} or \code{"lm"} and the colour of the ellipses when \code{addEllipses} is one of \code{"outer"}, \code{"inner"}, or \code{"both"}. Note that \code{scatter.pars$scat.size} will be modified on an observation by observation level when \code{response.type} is \code{"uncertainty"}. Note also that the default for \code{scatter.pars$scat.pch} changes depending on whether \code{response.type} is given as \code{"points"} or \code{"uncertainty"}, though it can of course be modified in both cases. Finally, \code{scatter.pars$noise.size} can be used to modify \code{scatter.pars$scat.size} for observations assigned to the noise component (if any), but only when \code{response.type="points"}.
+#' eci.col=res$classification, noise.size=unit(0.2, "char")),}
+#' where \code{eci.col} gives the colour of the fitted lines &/or confidence intervals when \code{scatter.type} is one of \code{"ci"} or \code{"lm"} and the colour of the ellipses when \code{addEllipses} is one of \code{"outer"}, \code{"inner"}, or \code{"both"}. Note that \code{scatter.pars$scat.size} will be modified on an observation by observation level when \code{response.type} is \code{"uncertainty"}. Note also that the default for \code{scatter.pars$scat.pch} changes depending on whether \code{response.type} is given as \code{"points"} or \code{"uncertainty"}, though it can of course be modified in both cases. Finally, \code{scatter.pars$noise.size} can be used to modify \code{scatter.pars$scat.size} for observations assigned to the noise component (if any), but only when \code{response.type="points"}.
 #' @param density.pars A list supplying select parameters for visualising the bivariate density contours, only when \code{response.type} is \code{"density"}.
 #'
 #' \code{NULL} is equivalent to:
@@ -83,10 +83,10 @@
 #'
 #' \code{\link{plot.MoEClust}} is a wrapper to \code{\link{MoE_gpairs}} which accepts the default arguments, and also produces other types of plots. Caution is advised producing generalised pairs plots when the dimension of the data is large.
 #' @export
-#' @author Keefe Murphy - <\email{keefe.murphy@@ucd.ie}>
-#' @references Murphy, K. and Murphy, T. B. (2019). Gaussian parsimonious clustering models with covariates and a noise component. \emph{Advances in Data Analysis and Classification}, 1-33. <\href{https://doi.org/10.1007/s11634-019-00373-8}{doi:10.1007/s11634-019-00373-8}>.
+#' @author Keefe Murphy - <\email{keefe.murphy@@mu.ie}>
+#' @references Murphy, K. and Murphy, T. B. (2020). Gaussian parsimonious clustering models with covariates and a noise component. \emph{Advances in Data Analysis and Classification}, 14(2): 293-325. <\href{https://doi.org/10.1007/s11634-019-00373-8}{doi:10.1007/s11634-019-00373-8}>.
 #'
-#' Emerson, J. W., Green, W. A., Schloerke, B., Crowley, J., Cook, D., Hofmann, H. and Wickham, H. (2013). The generalized pairs plot. \emph{Journal of Computational and Graphical Statistics}, 22(1):79-91.
+#' Emerson, J. W., Green, W. A., Schloerke, B., Crowley, J., Cook, D., Hofmann, H. and Wickham, H. (2013). The generalized pairs plot. \emph{Journal of Computational and Graphical Statistics}, 22(1): 79-91.
 #' @seealso \code{\link{MoE_clust}}, \code{\link{MoE_stepwise}}, \code{\link{plot.MoEClust}}, \code{\link{MoE_Uncertainty}}, \code{\link{expert_covar}}, \code{\link[lattice]{panel.stripplot}}, \code{\link[lattice]{panel.bwplot}}, \code{\link[lattice]{panel.violin}}, \code{\link[vcd]{strucplot}}
 #' @keywords plotting
 #' @usage
@@ -232,18 +232,19 @@ MoE_gpairs.MoEClust <- function(res, response.type = c("points", "uncertainty", 
   if(L  <= length(mclust.options("classPlotSymbols"))) {
     symbols   <- mclust.options("classPlotSymbols")
     if(noise) { 
-      symbols <- c(symbols[-which(symbols == 4)][seq_len(G)], 4)
+      symbols <- c(symbols[-which(symbols == 4)][Gseq], 4)
+    } else    {
+      symbols <- symbols[Gseq]
     }
-    symbols   <- symbols[seq_len(L)]
   } else if(L <= 9)  {
     symbols   <- as.character(seq_len(9L))
   } else if(L <= 26) {
     symbols   <- LETTERS
   } 
   if(L <= length(mclust.options("classPlotColors"))) {
-    colors    <- mclust.options("classPlotColors")[seq_len(L)]
+    colors    <- mclust.options("classPlotColors")[Gseq]
     if(noise)  { 
-      colors  <- c(colors[seq_len(G)], "darkgrey")
+      colors  <- c(colors[Gseq], "darkgrey")
     }
   } else if(length(colors) == 1) colors <- rep(colors, L)
   if(length(symbols) < L) {                           warning("More symbols needed to show classification\n", call.=FALSE)
@@ -342,8 +343,8 @@ MoE_gpairs.MoEClust <- function(res, response.type = c("points", "uncertainty", 
   if(is.null(scatter.pars$scat.col))  {
     scatter.pars$col    <- colors[claSS]
   } else scatter.pars$col    <- scatter.pars$scat.col
-  if(is.null(scatter.pars$lci.col))   {
-    scatter.pars$lci.col     <- colors[Gseq]
+  if(is.null(scatter.pars$eci.col))   {
+    scatter.pars$eci.col     <- colors[claSS]
   }
   if(response.type == "uncertainty")  {
     uncertainty         <- res$uncertainty
@@ -480,8 +481,8 @@ MoE_gpairs.MoEClust <- function(res, response.type = c("points", "uncertainty", 
     mosaic.pars$shade   <- NULL
   }
   noise.cols <- scatter.pars$col
-  scatter.pars$ecol     <- unique(noise.cols[claSS != G + 1])[match(Gseq, uni.c)]
-  noise.cols <- unique(noise.cols)[match(if(noise) c(Gseq, G + 1) else Gseq, unique(claSS))]
+  scatter.pars$ecol     <- unique(noise.cols[claSS != G + 1])[stats::na.omit(match(Gseq, uni.c))]
+  noise.cols <- unique(noise.cols)[stats::na.omit(match(if(noise) c(Gseq, G + 1) else Gseq, unique(claSS)))]
   grid::grid.newpage()
   vp.main    <- grid::viewport(x=outer.margins$bottom, y=outer.margins$left,
                                width=grid::unit(1,  "npc") - outer.margins$right - outer.margins$left,
@@ -566,7 +567,7 @@ MoE_gpairs.MoEClust <- function(res, response.type = c("points", "uncertainty", 
           }
         }
         if(all(is.factor(x[,i]),  is.factor(x[,j]))) {
-          .mosaic_panel(x=x[,j], y=x[,i], mosaic.pars=mosaic.pars, mosaic.outer=if(j == 1) noise.cols else if(i == 1) rep(noise.cols, each=nlevels(x[,j])) else mosaic.pars$gp$col, axis.pars=axis.pars, xpos=xpos, ypos=ypos, outer.rot=outer.rot, bg=bg)
+          .mosaic_panel(x=x[,j], y=x[,i], mosaic.pars=mosaic.pars, mosaic.outer=if(j == 1) rep(noise.cols, each=nlevels(x[,i])) else if(i == 1) rep(noise.cols, nlevels(x[,j])) else mosaic.pars$gp$col, axis.pars=axis.pars, xpos=xpos, ypos=ypos, outer.rot=outer.rot, bg=bg)
         }
       }
       grid::popViewport(1)
@@ -582,11 +583,11 @@ MoE_gpairs.MoEClust <- function(res, response.type = c("points", "uncertainty", 
 #' Plots the gating network for fitted MoEClust models, i.e. the observation index against the mixing proportions for that observation, coloured by cluster.
 #' @param res An object of class \code{"MoEClust"} generated by \code{\link{MoE_clust}}, or an object of class \code{"MoECompare"} generated by \code{\link{MoE_compare}}. Models with a noise component are facilitated here too.
 #' @param x.axis Optional argument for the x-axis against which the mixing proportions are plotted. Defaults to \code{1:res$n} if missing. Supplying \code{x.axis} changes the defaults for the \code{type} and \code{xlab} arguments. Users are advised to only use quantities related to the gating network of the fitted model here. Furthermore, use of the \code{x.axis} argument is not recommended for models with more than one gating network covariate.
-#' @param type,pch,xlab,ylab,ylim,col These graphical parameters retain their definitions from \code{\link[graphics]{matplot}}. \code{col} defaults to the settings in \code{\link[mclust]{mclust.options}}.
+#' @param type,pch,xlab,ylab,ylim,col These graphical parameters retain their definitions from \code{\link[graphics]{matplot}}. \code{col} defaults to the settings in \code{\link[mclust]{mclust.options}}. Note that the default value of \code{type} changes depending on whether \code{x.axis} is supplied and whether the gating network contains multiple covariates &/or categorical covariates.
 #' @param ... Catches unused arguments, or additional arguments to be passed to \code{\link[graphics]{matplot}}.
 #'
 #' @return A plot of the gating network of the fitted MoEClust model. The parameters of the gating network can also be returned invisibly.
-#' @author Keefe Murphy - <\email{keefe.murphy@@ucd.ie}>
+#' @author Keefe Murphy - <\email{keefe.murphy@@mu.ie}>
 #' @note \code{\link{plot.MoEClust}} is a wrapper to \code{\link{MoE_plotGate}} which accepts the default arguments, and also produces other types of plots.
 #'
 #' By default, the noise component (if any) will be coloured \code{"darkgrey"}.
@@ -625,7 +626,7 @@ MoE_plotGate  <- function(res, x.axis = NULL, type = "b", pch = 1, xlab = "Obser
 #' @method MoE_plotGate MoEClust
 #' @export
 MoE_plotGate.MoEClust   <- function(res, x.axis = NULL, type = "b", pch = 1, xlab = "Observation", ylab = expression(widehat(tau)[g]), ylim = c(0, 1), col = NULL, ...) {
-  res        <- if(inherits(res, "MoECompare")) res$optimal        else res
+  res        <- if(inherits(res, "MoECompare")) res$optimal                else res
   oldpar     <- suppressWarnings(graphics::par(no.readonly=TRUE))
   oldpar$new <- FALSE
   on.exit(suppressWarnings(graphics::par(oldpar)))
@@ -633,20 +634,24 @@ MoE_plotGate.MoEClust   <- function(res, x.axis = NULL, type = "b", pch = 1, xla
   N          <- res$n
   G          <- res$G
   Tau        <- .mat_byrow(res$parameters$pro, nrow=N, ncol=ncol(res$z))
-  ncovs      <- length(all.vars(stats::as.formula(attr(res$gating, "Formula")))) > 1
-  ax.miss    <- is.null(x.axis)
-  xlab       <- if(!ax.miss && missing(xlab))  deparse(substitute(x.axis)) else xlab
-  x.axis     <- if(ax.miss)    seq_len(N) else x.axis
-  type       <- if(!ax.miss && ncovs) "p" else type
+  vars       <- all.vars(stats::as.formula(attr(res$gating, "Formula")))
+  ncovs      <- length(vars)  > 1
+  axmiss     <- is.null(x.axis)
+  tmiss      <- missing(type)
+  xlab       <- if(!axmiss   && missing(xlab)) deparse(substitute(x.axis)) else xlab
+  x.axis     <- if(axmiss)      seq_len(N) else x.axis
+  type       <- if(tmiss     && 
+                   !axmiss   && ncovs) "p" else type 
   if(length(x.axis) != N)                             stop("'x.axis' must be of length N", call.=FALSE)
   if(x.fac   <- is.factor(x.axis)) {
     xlev     <- levels(x.axis)
     x.axis   <- as.integer(x.axis)
     xaxt     <- "n"
   } else      {
+    type     <- ifelse(tmiss && any(vars %in% names(res$gating$xlevels)), "p", type)
     xaxt     <- "s"
   }
-  if(isFALSE(ax.miss))  {
+  if(isFALSE(axmiss))   {
     if(isTRUE(ncovs))                                 warning("Function may produce undesirable plot when 'x.axis' is supplied for a model with multiple gating network covariates\n", call.=FALSE, immediate.=TRUE)
     o.axis   <- order(x.axis, decreasing=FALSE)
     x.axis   <- x.axis[o.axis]
@@ -654,8 +659,8 @@ MoE_plotGate.MoEClust   <- function(res, x.axis = NULL, type = "b", pch = 1, xla
   }
   cX         <- missing(col)
   nX         <- is.na(res$hypvol)
-  col        <- if(cX) mclust.options("classPlotColors")[seq_len(G)] else col
-  col        <- if(cX  && !nX) c(rep(col, length.out=G), "darkgrey") else col
+  col        <- if(cX) mclust.options("classPlotColors")[seq_len(G)]        else col
+  col        <- if(cX  && !nX) c(rep(col, length.out=G), "darkgrey")        else col
   if(missing(ylab))     {
     graphics::matplot(x=x.axis, y=Tau, type=type, pch=pch, xlab="",   ylab="",   xaxt=xaxt, ylim=ylim, col=col, ...)
     dots     <- list(...)
@@ -682,7 +687,7 @@ MoE_plotGate.MoEClust   <- function(res, x.axis = NULL, type = "b", pch = 1, xla
 #'
 #' @importFrom mclust "plot.mclustBIC" "plot.mclustICL"
 #' @return A plot of the values of the chosen \code{criterion}. The values themselves can also be returned invisibly.
-#' @author Keefe Murphy - <\email{keefe.murphy@@ucd.ie}>
+#' @author Keefe Murphy - <\email{keefe.murphy@@mu.ie}>
 #' @keywords plotting
 #' @export
 #' @note \code{\link{plot.MoEClust}} is a wrapper to \code{\link{MoE_plotCrit}} which accepts the default arguments, and also produces other types of plots.
@@ -722,14 +727,14 @@ MoE_plotCrit.MoEClust   <- function(res, criterion = c("bic", "icl", "aic", "log
 #'
 #' Plots the log-likelihood at every iteration of the EM/CEM algorithm used to fit a MoEClust mixture model.
 #' @param res An object of class \code{"MoEClust"} generated by \code{\link{MoE_clust}}, or an object of class \code{"MoECompare"} generated by \code{\link{MoE_compare}}. Models with a noise component are facilitated here too.
-#' @param type,xlab,ylab,xaxt These graphical parameters retain their usual definitions from \code{\link[graphics]{plot}}.
-#' @param ... Catches unused arguments, or additional arguments to be passed to \code{\link[graphics]{plot}}.
+#' @param type,xlab,ylab,xaxt These graphical parameters retain their usual definitions from \code{\link{plot}}.
+#' @param ... Catches unused arguments, or additional arguments to be passed to \code{\link{plot}}.
 #'
 #' @return A plot of the log-likelihood versus the number EM iterations. A list with the vector of log-likelihood values and the final value at convergence can also be returned invisibly.
 #' @note \code{\link{plot.MoEClust}} is a wrapper to \code{\link{MoE_plotLogLik}} which accepts the default arguments, and also produces other types of plots.
 #'
 #' \code{res$LOGLIK} can also be plotted, to compare maximal log-likelihood values for all fitted models.
-#' @author Keefe Murphy - <\email{keefe.murphy@@ucd.ie}>
+#' @author Keefe Murphy - <\email{keefe.murphy@@mu.ie}>
 #' @keywords plotting
 #' @export
 #' @seealso \code{\link{MoE_clust}}, \code{\link{plot.MoEClust}},
@@ -779,7 +784,7 @@ MoE_plotLogLik.MoEClust  <- function(res, type = "l", xlab = "Iteration", ylab =
 #' @param ... Catches unused arguments.
 #'
 #' @details The y-axis of this plot runs from \code{0} to \code{1 - 1/res$G}, with a horizontal line also drawn at \code{1/res$G}. When \code{type="barplot"}, uncertainties greater than this value are given a different colour when \code{truth} is not supplied, otherwise misclassified observations are given a different colour. Note, however, that \eqn{G^{(0)}}{G^(0)} = \code{res$G + 1} is used in place of \code{res$G} for models with a noise component.
-#' @author Keefe Murphy - <\email{keefe.murphy@@ucd.ie}>
+#' @author Keefe Murphy - <\email{keefe.murphy@@mu.ie}>
 #' @note \code{\link{plot.MoEClust}} is a wrapper to \code{\link{MoE_Uncertainty}} which accepts the default arguments, and also produces other types of plots.
 #'
 #' An alternative means of visualising clustering uncertainties (at least for multivariate data) is provided by the functions \code{MoE_gpairs} and \code{plot.MoEClust}, specifically when their argument \code{response.type} is given as \code{"uncertainty"}.
@@ -832,7 +837,7 @@ MoE_Uncertainty.MoEClust <- function(res, type = c("barplot", "profile"), truth 
   if(tmiss   <- !missing(truth)) {
     if(all(!is.factor(truth), !is.numeric(truth)) ||
        n.obs != length(truth))                        stop(paste0("'truth' must be a numeric or factor vector of length N=",  n.obs), call.=FALSE)
-    mC       <- classError(res$classification, as.numeric(as.factor(truth)))$misclassified
+    mC       <- classError(classification=res$classification, class=as.numeric(as.factor(truth)))$misclassified
   }
   G          <- res$G + noise
   oneG       <- 1/G
@@ -867,7 +872,11 @@ MoE_Uncertainty.MoEClust <- function(res, type = c("barplot", "profile"), truth 
     }
   }
   graphics::mtext(paste0("Uncertainty", ifelse(noise, "\n(with a noise component)", "")), side=2, line=3)
-    invisible(if(tmiss) list(Uncertainties = ucert, Misclassified = mC) else invisible(ucert))
+  if(tmiss)   {
+    U        <- list(Uncertainties = ucert, Misclassified = mC)
+    class(U) <- "listof"
+  } else U   <- ucert
+    invisible(U)
 }
 
 #' Plot MoEClust Results
@@ -879,11 +888,11 @@ MoE_Uncertainty.MoEClust <- function(res, type = c("barplot", "profile"), truth 
 #' \item{\code{gpairs}}{A generalised pairs plot. To further customise this plot, arguments to \code{\link{MoE_gpairs}} can be supplied.}
 #' \item{\code{gating}}{The gating network. To further customise this plot, arguments to \code{\link{MoE_plotGate}} and \code{\link[graphics]{matplot}} can be supplied.}
 #' \item{\code{criterion}}{The model selection criteria. To further customise this plot, arguments to \code{\link{MoE_plotCrit}} and \code{\link[mclust]{plot.mclustBIC}} can be supplied.}
-#' \item{\code{loglik}}{The log-likelihood vs. the iterations of the EM algorithm. To further customise this plot, arguments to \code{\link{MoE_plotLogLik}} and \code{\link[graphics]{plot}} can be supplied.}
+#' \item{\code{loglik}}{The log-likelihood vs. the iterations of the EM algorithm. To further customise this plot, arguments to \code{\link{MoE_plotLogLik}} and \code{\link{plot}} can be supplied.}
 #' \item{\code{uncertainty}}{The clustering uncertainty for every observation. To further customise this plot, arguments to \code{\link{MoE_Uncertainty}} can be supplied.}
 #' }
 #' By default, all of the above graphs are produced.
-#' @param ... Optional arguments to be passed to \code{\link{MoE_gpairs}}, \code{\link{MoE_plotGate}}, \code{\link{MoE_plotCrit}}, \code{\link{MoE_plotLogLik}}, \code{\link{MoE_Uncertainty}}, \code{\link[graphics]{matplot}}, \code{\link[mclust]{plot.mclustBIC}} and \code{\link[graphics]{plot}}. In particular, the argument \code{legendArgs} to \code{\link[mclust]{plot.mclustBIC}} can be passed to \code{\link{MoE_plotCrit}}.
+#' @param ... Optional arguments to be passed to \code{\link{MoE_gpairs}}, \code{\link{MoE_plotGate}}, \code{\link{MoE_plotCrit}}, \code{\link{MoE_plotLogLik}}, \code{\link{MoE_Uncertainty}}, \code{\link[graphics]{matplot}}, \code{\link[mclust]{plot.mclustBIC}} and \code{\link{plot}}. In particular, the argument \code{legendArgs} to \code{\link[mclust]{plot.mclustBIC}} can be passed to \code{\link{MoE_plotCrit}}.
 #'
 #' @details For more flexibility in plotting, use \code{\link{MoE_gpairs}}, \code{\link{MoE_plotGate}}, \code{\link{MoE_plotCrit}}, \code{\link{MoE_plotLogLik}} and \code{\link{MoE_Uncertainty}} directly.
 #' @importFrom lattice "current.panel.limits" "panel.abline" "panel.bwplot" "panel.histogram" "panel.lines" "panel.points" "panel.rect" "panel.stripplot" "panel.text" "panel.violin" "trellis.grobname" "trellis.par.get" "trellis.par.set"
@@ -895,8 +904,8 @@ MoE_Uncertainty.MoEClust <- function(res, type = c("barplot", "profile"), truth 
 #' Other types of plots are available by first calling \code{\link{as.Mclust}} on the fitted object, and then calling \code{\link[mclust]{plot.Mclust}} on the results. These can be especially useful for univariate data.
 #' @return The visualisation according to \code{what} of the results of a fitted \code{MoEClust} model.
 #' @seealso \code{\link{MoE_clust}}, \code{\link{MoE_stepwise}}, \code{\link{MoE_gpairs}}, \code{\link{MoE_plotGate}}, \code{\link{MoE_plotCrit}}, \code{\link{MoE_plotLogLik}}, \code{\link{MoE_Uncertainty}}, \code{\link{as.Mclust}}, \code{\link[mclust]{plot.Mclust}}
-#'@references Murphy, K. and Murphy, T. B. (2019). Gaussian parsimonious clustering models with covariates and a noise component. \emph{Advances in Data Analysis and Classification}, 1-33. <\href{https://doi.org/10.1007/s11634-019-00373-8}{doi:10.1007/s11634-019-00373-8}>.
-#' @author Keefe Murphy - <\email{keefe.murphy@@ucd.ie}>
+#'@references Murphy, K. and Murphy, T. B. (2020). Gaussian parsimonious clustering models with covariates and a noise component. \emph{Advances in Data Analysis and Classification}, 14(2): 293-325. <\href{https://doi.org/10.1007/s11634-019-00373-8}{doi:10.1007/s11634-019-00373-8}>.
+#' @author Keefe Murphy - <\email{keefe.murphy@@mu.ie}>
 #' @export
 #' @method plot MoEClust
 #' @keywords plotting main
@@ -1237,7 +1246,7 @@ plot.MoEClust <- function(x, what=c("gpairs", "gating", "criterion", "loglik", "
   }, lm=   {
     for(g in seq_len(G)) {
       xy.lm <- stats::lm(y ~ x, weights=z[,g])
-      panel.abline(xy.lm$coef[1L], xy.lm$coef[2L], col=scatter.pars$lci.col[g], lwd=1)
+      panel.abline(xy.lm$coef[1L], xy.lm$coef[2L], col=scatter.pars$eci.col[g], lwd=1)
     }
   }, ci=   {
     for(g in seq_len(G)) {
@@ -1245,9 +1254,9 @@ plot.MoEClust <- function(x, what=c("gpairs", "gating", "criterion", "loglik", "
       xy    <- data.frame(x = seq(min(x, na.rm=TRUE), max(x, na.rm=TRUE), length.out=25))
       yhat  <- stats::predict(xy.lm, newdata=xy, interval="confidence")
       ci    <- data.frame(lower=yhat[, "lwr"], upper=yhat[, "upr"])
-      panel.abline(xy.lm$coef[1L], xy.lm$coef[2L], col=scatter.pars$lci.col[g], lwd=1)
-      grid::grid.lines(x=xy$x, y=ci$lower, default.units="native", gp=grid::gpar(col=scatter.pars$lci.col[g], lwd=1, lty=2))
-      grid::grid.lines(x=xy$x, y=ci$upper, default.units="native", gp=grid::gpar(col=scatter.pars$lci.col[g], lwd=1, lty=2))
+      panel.abline(xy.lm$coef[1L], xy.lm$coef[2L], col=scatter.pars$eci.col[g], lwd=1)
+      grid::grid.lines(x=xy$x, y=ci$lower, default.units="native", gp=grid::gpar(col=scatter.pars$eci.col[g], lwd=1, lty=2))
+      grid::grid.lines(x=xy$x, y=ci$upper, default.units="native", gp=grid::gpar(col=scatter.pars$eci.col[g], lwd=1, lty=2))
     }
   })
   grid::popViewport(1)
@@ -1585,7 +1594,6 @@ plot.MoEClust <- function(x, what=c("gpairs", "gating", "criterion", "loglik", "
 .bubble <- function(x, cex = c(0.2, 3), alpha = c(0.1, 1)) {
   cex   <- cex[!is.na(cex)]
   alpha <- alpha[!is.na(alpha)]
-  n     <- length(x)
   r     <- sqrt(x/pi)
   r     <- (r - min(r, na.rm=TRUE))/(diff(range(r, na.rm=TRUE)) + sqrt(.Machine$double.eps))
   cex   <- r  * diff(range(cex))   + min(cex)

@@ -52,7 +52,7 @@ The subsetting must include at least two variables, whether they be the MAP, a r
 
 \item{conditional}{A vector of length 2 (or 1) giving the plot type for the upper and lower triangular portions of the plot, respectively, for plots involving a mix of categorical and continuous variables. Defaults to \code{"stripplot"} in the upper triangle and \code{"boxplot"} in the lower triangle (see \code{\link[lattice]{panel.stripplot}} and \code{\link[lattice]{panel.bwplot}}). \code{"barcode"} and \code{"violin"} plots can also be produced. Only relevant for models with categorical covariates in the gating &/or expert network. Comparisons of two categorical variables (which can only ever be covariates) are always displayed via mosaic plots (see \code{\link[vcd]{strucplot}}).}
 
-\item{addEllipses}{Controls whether to add MVN ellipses with axes corresponding to the within-cluster covariances for the response data (\code{"yes"} or \code{"no"}). The options \code{"inner"} and \code{"outer"} (the default) will colour the axes or the perimeter of those ellipses, respectively, according to the cluster they represent (according to \code{scatter.pars$lci.col}). The option \code{"both"} will obviously colour both the axes and the perimeter. Ellipses are only ever drawn for multivariate data, and only when \code{response.type} is \code{"points"} or \code{"uncertainty"}.
+\item{addEllipses}{Controls whether to add MVN ellipses with axes corresponding to the within-cluster covariances for the response data (\code{"yes"} or \code{"no"}). The options \code{"inner"} and \code{"outer"} (the default) will colour the axes or the perimeter of those ellipses, respectively, according to the cluster they represent (according to \code{scatter.pars$eci.col}). The option \code{"both"} will obviously colour both the axes and the perimeter. Ellipses are only ever drawn for multivariate data, and only when \code{response.type} is \code{"points"} or \code{"uncertainty"}.
 
 Ellipses are centered on the posterior mean of the fitted values when there are expert network covariates, otherwise on the posterior mean of the response variables. In the presence of expert network covariates, the component-specific covariance matrices are also (by default, via the argument \code{expert.covar} below) modified for plotting purposes via the function \code{\link{expert_covar}}, in order to account for the extra variability of the means, usually resulting in bigger shapes & sizes for the MVN ellipses.}
 
@@ -72,7 +72,7 @@ Defaults to \code{c("cornsilk", "white", "palegoldenrod", "palegoldenrod", "corn
 
 \item{outer.rot}{A 2-vector (\code{x}, \code{y}) rotating the top/bottom outer labels \code{x} degrees and the left/right outer labels \code{y} degrees. Only works for categorical labels of boxplot and mosaic panels. Defaults to \code{c(0, 90)}.}
 
-\item{gap}{The gap between the tiles; defaulting to 0.05 of the width of a tile.}
+\item{gap}{The gap between the tiles; defaulting to \code{0.05} of the width of a tile.}
 
 \item{buffer}{The fraction by which to expand the range of quantitative variables to provide plots that will not truncate plotting symbols. Defaults to \code{0.025}, i.e. 2.5 percent of the range.}
 
@@ -83,8 +83,8 @@ Defaults to \code{c("cornsilk", "white", "palegoldenrod", "palegoldenrod", "corn
 \code{NULL} is equivalent to:
 \preformatted{list(scat.pch=if(response.type == "uncertainty") 19 else res$classification,
 scat.size=unit(0.25, "char"), scat.col=res$classification, 
-lci.col=res$classification, noise.size=unit(0.2, "char")),}
-where \code{lci.col} gives the colour of the fitted lines &/or confidence intervals when \code{scatter.type} is one of \code{"ci"} or \code{"lm"} and the colour of the ellipses when \code{addEllipses} is one of \code{"outer"}, \code{"inner"}, or \code{"both"}. Note that \code{scatter.pars$scat.size} will be modified on an observation by observation level when \code{response.type} is \code{"uncertainty"}. Note also that the default for \code{scatter.pars$scat.pch} changes depending on whether \code{response.type} is given as \code{"points"} or \code{"uncertainty"}, though it can of course be modified in both cases. Finally, \code{scatter.pars$noise.size} can be used to modify \code{scatter.pars$scat.size} for observations assigned to the noise component (if any), but only when \code{response.type="points"}.}
+eci.col=res$classification, noise.size=unit(0.2, "char")),}
+where \code{eci.col} gives the colour of the fitted lines &/or confidence intervals when \code{scatter.type} is one of \code{"ci"} or \code{"lm"} and the colour of the ellipses when \code{addEllipses} is one of \code{"outer"}, \code{"inner"}, or \code{"both"}. Note that \code{scatter.pars$scat.size} will be modified on an observation by observation level when \code{response.type} is \code{"uncertainty"}. Note also that the default for \code{scatter.pars$scat.pch} changes depending on whether \code{response.type} is given as \code{"points"} or \code{"uncertainty"}, though it can of course be modified in both cases. Finally, \code{scatter.pars$noise.size} can be used to modify \code{scatter.pars$scat.size} for observations assigned to the noise component (if any), but only when \code{response.type="points"}.}
 
 \item{density.pars}{A list supplying select parameters for visualising the bivariate density contours, only when \code{response.type} is \code{"density"}.
 
@@ -167,14 +167,14 @@ MoE_gpairs(resN, data.ind=c(1,2,5), cov.ind=c(3,1,2),
 conditional="barcode", noise.size=grid::unit(0.5, "char"))}
 }
 \references{
-Murphy, K. and Murphy, T. B. (2019). Gaussian parsimonious clustering models with covariates and a noise component. \emph{Advances in Data Analysis and Classification}, 1-33. <\href{https://doi.org/10.1007/s11634-019-00373-8}{doi:10.1007/s11634-019-00373-8}>.
+Murphy, K. and Murphy, T. B. (2020). Gaussian parsimonious clustering models with covariates and a noise component. \emph{Advances in Data Analysis and Classification}, 14(2): 293-325. <\href{https://doi.org/10.1007/s11634-019-00373-8}{doi:10.1007/s11634-019-00373-8}>.
 
-Emerson, J. W., Green, W. A., Schloerke, B., Crowley, J., Cook, D., Hofmann, H. and Wickham, H. (2013). The generalized pairs plot. \emph{Journal of Computational and Graphical Statistics}, 22(1):79-91.
+Emerson, J. W., Green, W. A., Schloerke, B., Crowley, J., Cook, D., Hofmann, H. and Wickham, H. (2013). The generalized pairs plot. \emph{Journal of Computational and Graphical Statistics}, 22(1): 79-91.
 }
 \seealso{
 \code{\link{MoE_clust}}, \code{\link{MoE_stepwise}}, \code{\link{plot.MoEClust}}, \code{\link{MoE_Uncertainty}}, \code{\link{expert_covar}}, \code{\link[lattice]{panel.stripplot}}, \code{\link[lattice]{panel.bwplot}}, \code{\link[lattice]{panel.violin}}, \code{\link[vcd]{strucplot}}
 }
 \author{
-Keefe Murphy - <\email{keefe.murphy@ucd.ie}>
+Keefe Murphy - <\email{keefe.murphy@mu.ie}>
 }
 \keyword{plotting}

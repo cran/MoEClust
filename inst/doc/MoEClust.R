@@ -38,11 +38,8 @@ comp  <- MoE_compare(m1, m2, m3, m4, m5, m6, optimal.only=TRUE)
 ## -----------------------------------------------------------------------------
 (best  <- MoE_compare(mod1, mod2, comp, pick=1)$optimal)
 
-## ---- eval=FALSE--------------------------------------------------------------
-#  (summ <- summary(best, classification=TRUE, parameters=FALSE, networks=FALSE))
-
-## ---- echo=FALSE--------------------------------------------------------------
-(summ <- suppressWarnings(summary(best)))
+## -----------------------------------------------------------------------------
+(summ <- summary(best, classification=TRUE, parameters=FALSE, networks=FALSE))
 
 ## -----------------------------------------------------------------------------
 plot(best, what="gpairs", jitter=FALSE)
@@ -65,7 +62,7 @@ getden <- function(x, y, res) {
   rowSums(matrix(res$parameters$pro, nrow=length(x), ncol=G, byrow=TRUE) * den)
 }
 mat    <- matrix(getden(grid[,1L], grid[,2L], res), length(x.new), length(y.new))
-image(x.new, y.new, mat, col=c("white", heat.colors(30L)[30L:1L]), xlab="GNP", ylab=paste('CO'[2]), add=TRUE)
+image(x.new, y.new, mat, col=c("white", grDevices::heat.colors(30L, rev=TRUE)), xlab="GNP", ylab=paste('CO'[2]), add=TRUE)
 box(lwd=1)
 contour(x.new, y.new, mat, add=TRUE, col="grey60", labcex=0.75)
 points(GNP, CO2)
@@ -73,6 +70,8 @@ points(GNP, CO2)
 ## ---- fig.height=5.5, fig.width=5.5-------------------------------------------
 mod <- as.Mclust(comp$optimal)
 plot(mod, what="classification")
+
+## ---- fig.height=5.5, fig.width=5.5-------------------------------------------
 plot(mod, what="uncertainty")
 
 ## ---- eval=FALSE--------------------------------------------------------------
@@ -143,11 +142,16 @@ plot(mod, what="loglik")
 #  z <- factor(mod$classification[mod$classification > 0],
 #              labels=paste0("Cluster", seq_len(mod$G)))
 #  splom(~ hema | ais$sex, groups=z)
-#  splom(~ hema | z, groups=ais$sex)
 
 ## ---- echo=FALSE, fig.height=4------------------------------------------------
 require("lattice", quietly=TRUE)
 z <- factor(mod$classification[mod$classification > 0], labels=paste0("Cluster", seq_len(mod$G)))
 splom(~ hema | ais$sex, groups=z, xlab=NULL)
+
+## ---- eval=FALSE--------------------------------------------------------------
+#  splom(~ hema | z, groups=ais$sex)
+
+## ---- echo=FALSE, fig.height=4------------------------------------------------
+require("lattice", quietly=TRUE)
 splom(~ hema | z, groups=ais$sex, xlab=NULL)
 

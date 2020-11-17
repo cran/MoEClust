@@ -11,7 +11,7 @@ noise_vol(data,
 \arguments{
 \item{data}{A numeric vector, matrix, or data frame of observations. Categorical variables are not allowed, and covariates should not be included. If a matrix or data frame, rows correspond to observations and columns correspond to variables. There \strong{must} be more observations than variables.}
 
-\item{method}{The method used to estimate the hypervolume. The default method uses the function \code{\link[mclust]{hypvol}}. The "\code{convexhull}" and "\code{ellipsoidhull}" options require loading the \code{geometry} and \code{cluster} libraries, respectively. This argument is only relevant for multivariate data; for univariate data, the range of the data is used.}
+\item{method}{The method used to estimate the hypervolume. The default method uses the function \code{\link[mclust]{hypvol}}. The \code{"convexhull"} and \code{"ellipsoidhull"} options require loading the \code{geometry} and \code{cluster} libraries, respectively. This argument is only relevant for multivariate data; for univariate data, the range of the data is used.}
 
 \item{reciprocal}{A logical variable indicating whether or not the reciprocal hypervolume is desired rather than the hypervolume itself. The default is to return the hypervolume.}
 }
@@ -43,6 +43,6 @@ noise_vol(ais[,3:7], reciprocal=FALSE, method="convexhull")
 \code{\link[mclust]{hypvol}}, \code{\link[geometry]{convhulln}}, \code{\link[cluster]{ellipsoidhull}}
 }
 \author{
-Keefe Murphy - <\email{keefe.murphy@ucd.ie}>
+Keefe Murphy - <\email{keefe.murphy@mu.ie}>
 }
 \keyword{control}
