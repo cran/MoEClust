@@ -8,13 +8,16 @@ vignette: >
   %\VignetteIndexEntry{MoEClust}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+  %\VignetteDepends{grDevices}
+  %\VignetteDepends{lattice}
+  %\VignetteDepends{mclust}
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(fig.width=7, fig.height=7, fig.align = 'center', 
                       fig.show='hold', warning=FALSE, 
                       message=FALSE, progress=FALSE, 
-                      collapse=TRUE, comments="#>")
+                      collapse=TRUE, comment="#>")
 
 if(isTRUE(capabilities("cairo"))) {
   knitr::opts_chunk$set(dev.args=list(type="cairo"))
@@ -32,16 +35,16 @@ The most important function in the __MoEClust__ package is: `MoE_clust`, for fit
 
 A dedicated plotting function exists for visualising the results using generalised pairs plots, for examining the gating network, and/or log-likelihood, and/or clustering uncertainties, and/or graphing model selection criteria values. The generalised pairs plots (`MoE_gpairs`) visualise all pairwise relationships between clustered response variables and associated continuous, categorical, and/or ordinal covariates in the gating &/or expert networks, coloured according to the MAP classification, and also give the marginal distributions of each variable (incl. the covariates) along the diagonal.
 
-An `as.Mclust` method is provided to coerce the output of class `"MoEClust"` from `MoE_clust` to the `"Mclust"` class, to facilitate use of plotting and other functions for the `"Mclust"` class within the __mclust__ package. As per __mclust__, __MoEClust__ also facilitates modelling with an additional noise component (with or without the mixing proportion for the noise component depending on covariates). Finally, a `predict` method is provided for predicting the fitted response and probability of cluster membership (and by extension the MAP classification) for new data, in the form of new covariates and new response data, or new covariates only.
+An `as.Mclust` method is provided to coerce the output of class `"MoEClust"` from `MoE_clust` to the `"Mclust"` class, to facilitate use of plotting and other functions for the `"Mclust"` class within the __mclust__ package. As per __mclust__, __MoEClust__ also facilitates modelling with an additional noise component (with or without the mixing proportion for the noise component depending on covariates). 
 
-Other functions also exist, e.g. `MoE_crit`, `MoE_dens`, `MoE_estep`, and `aitken`, which are all used within `MoE_clust` but are nonetheless made available for standalone use. The package also contains two data sets: `ais` and `CO2data`.
+Finally, a `predict` method is provided for predicting the fitted response and probability of cluster membership (and by extension the MAP classification) for new data, in the form of new covariates and new response data, or new covariates only.
 
-If you find bugs or want to suggest new features please visit the __MoEClust__ [GitHub issues page](https://github.com/Keefe-Murphy/MoEClust/issues). 
+Other functions also exist, e.g. `MoE_crit`, `MoE_dens`, `MoE_estep`, and `aitken`, which are all used within `MoE_clust` but are nonetheless made available for standalone use. The package also contains two data sets: `CO2data` and `ais`. 
 
-This vignette aims to demonstrate the __MoEClust__ models via application to well-known univariate and multivariate data sets provided with the package.
+This vignette aims to demonstrate the __MoEClust__ models via application to these two well-known univariate and multivariate data sets, respectively.
 
 ### Installing MoEClust
-__MoEClust__ will run in Windows, Mac OS X, or Linux. To install it you first need to install [R](https://cran.r-project.org/). Installing [RStudio](https://rstudio.com/) as a nice desktop environment for using R is also recommended.
+__MoEClust__ will run in Windows, Mac OS X, or Linux. To install it you first need to install [R](https://cran.r-project.org/). Installing [RStudio](https://www.rstudio.com/) as a nice desktop environment for using R is also recommended.
 
 Once in R you can type at the R command prompt:
 
@@ -58,6 +61,10 @@ To instead install the latest stable official release of the package from CRAN g
 install.packages('MoEClust')
 ```
 
+```{r, echo=FALSE}
+suppressMessages(library(mclust))
+```
+
 In either case, if you then type:
 
 ```{r}
@@ -66,7 +73,9 @@ library(MoEClust)
 
 it will load in all the __MoEClust__ functions.
 
-The GitHub version contains a few more features but some of these may not yet be fully tested, and occasionally this version might be liable to break when it is in the process of being updated.
+The GitHub version contains a few more features but some of these may not yet be fully tested, and occasionally this version might be liable to break when it is in the process of being updated. 
+
+If you find bugs or want to suggest new features please visit the __MoEClust__ [GitHub issues page](https://github.com/Keefe-Murphy/MoEClust/issues). 
 
 ## CO2 Data
 Load the CO2 data.
@@ -79,7 +88,7 @@ GNP   <- CO2data$GNP
 
 Fit various MoEClust mixture models to cluster the CO2 data, allowing the GNP variable to enter the gating &/or expert networks, or neither, via a formula interface. Also consider models with equal mixing proportions. Note that for models with covariates in the gating network, or models with equal mixing proportions, we don't need to fit single-component models (though it could be done!) as this would merely duplicate the single-component models within `m1` and `m3`, respectively. 
 
-```{r, results='hide'}
+```{r, echo=FALSE}
 m1    <- MoE_clust(CO2, G=1:3, verbose=FALSE)
 m2    <- MoE_clust(CO2, G=2:3, gating= ~ GNP, verbose=FALSE)
 m3    <- MoE_clust(CO2, G=1:3, expert= ~ GNP, verbose=FALSE)
@@ -88,26 +97,34 @@ m5    <- MoE_clust(CO2, G=2:3, equalPro=TRUE, verbose=FALSE)
 m6    <- MoE_clust(CO2, G=2:3, expert= ~ GNP, equalPro=TRUE, verbose=FALSE)
 ```
 
+```{r, eval=FALSE}
+m1    <- MoE_clust(CO2, G=1:3)
+m2    <- MoE_clust(CO2, G=2:3, gating= ~ GNP)
+m3    <- MoE_clust(CO2, G=1:3, expert= ~ GNP)
+m4    <- MoE_clust(CO2, G=2:3, gating= ~ GNP, expert= ~ GNP)
+m5    <- MoE_clust(CO2, G=2:3, equalPro=TRUE)
+m6    <- MoE_clust(CO2, G=2:3, expert= ~ GNP, equalPro=TRUE)
+```
+
 Choose the best model among these. Specify `optimal.only=TRUE` so that only the optimal model in each set of models is included in the comparison.
 
 ```{r}
 comp  <- MoE_compare(m1, m2, m3, m4, m5, m6, optimal.only=TRUE)
 ```
 
-See if a better model can be found using greedy forward stepwise selection.
-Conduct a stepwise search on the same data.
+Now, see if a better model can be found using greedy forward stepwise selection, with the aid of the `MoE_stepwise` function, on the same data. By default, this starts from a single-component model and successively adds components and covariates to both networks, while evaluating each action over all possible model types, until a model which is optimal according to some criterion is found.
 
 ```{r}
-(mod1 <- MoE_stepwise(CO2, GNP, verbose=FALSE))
+(mod1 <- MoE_stepwise(CO2, GNP))
 ```
 
-Conduct another stepwise search considering models with a noise component.
+Next, conduct another stepwise search considering models with a noise component. This notably starts from a model with only a uniform noise component and then proceeds as above to add Gaussian components and covariates one at a time, accepting each action that increases a chosen criterion (`"bic"`, by default).
 
 ```{r} 
-(mod2 <- MoE_stepwise(CO2, GNP, noise=TRUE, verbose=FALSE))
+(mod2 <- MoE_stepwise(CO2, GNP, noise=TRUE))
 ```
 
-Compare all sets of results to choose the optimal model.
+Finally, compare all sets of results to choose the optimal model.
 
 ```{r}
 (best  <- MoE_compare(mod1, mod2, comp, pick=1)$optimal)
@@ -134,8 +151,8 @@ y.name <- names(res$data)
 x      <- as.matrix(res$net.covs)
 y      <- as.matrix(res$data)
 plot(x=x, y=y, main=substitute(atop(paste('CO'[2], " Data"), paste(Mname, " model, G=", rG, ", equal mixing proportions, incl. expert network covariate: GNP")), list(Mname=res$modelName, rG=G)), ylab=expression('CO'[2]), xlab="GNP", type="n", cex.main=0.95)
-x.new  <- setNames(seq(par("usr")[1], par("usr")[2], length=100), rep("GNP", 100))
-y.new  <- setNames(seq(par("usr")[3], par("usr")[4], length=100), rep("CO2", 100))
+x.new  <- setNames(seq(par("usr")[1L], par("usr")[2L], length=500L), rep("GNP", 500L))
+y.new  <- setNames(seq(par("usr")[3L], par("usr")[4L], length=500L), rep("CO2", 500L))
 grid   <- expand.grid(x.new, y.new)
 getden <- function(x, y, res) {
   sig  <- res$parameters$variance$modelName
@@ -172,9 +189,13 @@ as.vector(suppressWarnings(predict(comp$optimal)$y))
 
 Now let's build a model on some of the CO2 data and retain the indices of the withheld observations:
 
+```{r, echo=FALSE}
+set.seed(4321)
+```
+
 ```{r, results="hide"}
 ind     <- sample(1:nrow(CO2data), 2)
-res2    <- MoE_clust(CO2data[-ind,]$CO2, G=3, expert=~GNP, 
+res     <- MoE_clust(CO2data[-ind,]$CO2, G=3, expert= ~ GNP, 
                      equalPro=TRUE, network.data=CO2data[-ind,])
 ```
 
@@ -182,18 +203,18 @@ Now we can make predictions on the withheld data, either by using the withheld c
 
 ```{r, eval=FALSE}
 # Using new covariates only
-predict(res2, newdata = CO2data[ind,], use.y = FALSE)[1:3]
+predict(res, newdata = CO2data[ind,], use.y = FALSE)[1:3]
 
 # Using both new covariates & new response data
-predict(res2, newdata = CO2data[ind,])[1:3]         
+predict(res, newdata = CO2data[ind,])[1:3]         
 ```
 
 ```{r, echo=FALSE}
 # Using new covariates only
-suppressWarnings(predict(res2, newdata = CO2data[ind,], use.y = FALSE)[1:3])
+suppressWarnings(predict(res, newdata = CO2data[ind,], use.y = FALSE)[1:3])
 
 # Using both new covariates & new response data
-predict(res2, newdata = CO2data[ind,])[1:3]         
+predict(res, newdata = CO2data[ind,])[1:3]         
 ```
 
 ## AIS Data
@@ -227,7 +248,7 @@ Visualise the results for the optimal model using a generalised pairs plot.
 plot(mod, what="gpairs")
 ```
 
-Replace the scatter plots in response vs. response panels with bivariate density contours. Note that this is liable to be slow for models with expert network covariates.
+Replace the scatterplots in response vs. response panels with bivariate density contours. Note that this is liable to be slow for models with expert network covariates.
 
 ```{r}
 plot(mod, what="gpairs", response.type="density")
@@ -273,7 +294,7 @@ Produce further visualisations for the Gaussian components with the aid of the `
 require("lattice")
 z <- factor(mod$classification[mod$classification > 0], 
             labels=paste0("Cluster", seq_len(mod$G)))
-splom(~ hema | ais$sex, groups=z)
+splom(~ hema | ais$sex, groups=z, xlab=NULL)
 ```
 
 ```{r, echo=FALSE, fig.height=4}
@@ -283,7 +304,7 @@ splom(~ hema | ais$sex, groups=z, xlab=NULL)
 ```
 
 ```{r, eval=FALSE}
-splom(~ hema | z, groups=ais$sex)
+splom(~ hema | z, groups=ais$sex, xlab=NULL)
 ```
 
 ```{r, echo=FALSE, fig.height=4}
@@ -294,8 +315,8 @@ splom(~ hema | z, groups=ais$sex, xlab=NULL)
 ---------
 
 ## References
-Murphy, K. and Murphy, T. B. (2020). Gaussian parsimonious clustering models with covariates and a noise component. _Advances in Data Analysis and Classification_, 14(2): 293-325. <[doi:10.1007/s11634-019-00373-8](https://doi.org/10.1007/s11634-019-00373-8)>.
+Murphy, K. and Murphy, T. B. (2020). Gaussian parsimonious clustering models with covariates and a noise component. _Advances in Data Analysis and Classification_, 14(2): 293--325. <[doi:10.1007/s11634-019-00373-8](https://doi.org/10.1007/s11634-019-00373-8)>.
 
-Fraley, C. and Raftery, A. E. (2002). Model-based clustering, discriminant analysis, and density estimation. _Journal of the American Statistical Association_, 97(458):611-631.
+Fraley, C. and Raftery, A. E. (2002). Model-based clustering, discriminant analysis, and density estimation. _Journal of the American Statistical Association_, 97(458): 611--631.
 
-Scrucca L., Fop M., Murphy T. B. and Raftery A. E. (2016). mclust 5: clustering, classification and density estimation using Gaussian finite mixture models. _The R Journal_, 8(1):289-317.
+Scrucca L., Fop M., Murphy T. B. and Raftery A. E. (2016). mclust 5: clustering, classification and density estimation using Gaussian finite mixture models. _The R Journal_, 8(1): 289--317.

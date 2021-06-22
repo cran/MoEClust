@@ -5,15 +5,63 @@ __with Gating and Expert Network Covariates__
 __and a Noise Component__
 =======================================================
 
+## MoEClust v1.4.0 - (_12<sup>th</sup> release [minor update]: 2021-06-21_)
+### New Features, Improvements, Big Fixes, & Miscellaneous Edits
+* Various edits to `MoE_stepwise()` (thanks, in part, to requests from Dr. Konstantinos Perrakis):  
+  * Added `initialModel` arg. for specifying an initial model from which to begin the search,  
+  which may already be a mixture and may already include covariates, etc.
+  * Added `initialG` arg. as a simpler alternative when the only available  
+  prior information is on the number of components.
+  * Added `stepG` arg. (defaults to `TRUE`) for fixing the number of components  
+  & searching only over different covariate configurations (i.e. when `FALSE`).
+  * Speedups by preventing superfluous searches for equal  
+  mixing proportion models when there are gating covariates.
+  * `noise.gate` arg. now also invoked when adding components to models with gating covariates  
+  & a noise component (previously only when adding gating covariates to models with noise).
+  * `equalPro` & `noise.gate` args. gain new default `"all"` (see documentation for details).
+  * Stronger checks on `network.data` argument.
+* New methods and edits related to prediction:  
+  * Added `fitted` method for `"MoEClust"`objects (a wrapper to `predict.MoEClust`).
+  * Added `predict`, `fitted`, & `residuals` methods for `"MoE_gating"` objects, i.e. `x$gating`.
+  * Added `predict`, `fitted`, & `residuals` methods for `"MoE_expert"` objects, i.e. `x$expert`.
+  * Minor edits to `predict.MoEClust` for models without expert network covariates.
+  * Minor fixes to returned `x$gating` object for `equalPro=TRUE` models with a noise component.
+* Various edits & documentation improvements to `MoE_gpairs`:  
+  * Fixes to ellipses for models with expert covariates due to fix to `expert_covar` (see below).
+  * `mosaic.pars` gains logical arg. `mfill=TRUE`, to toggle between filling select tiles with colour  
+  (new default behaviour), or outlining select tiles with colour (old behaviour).
+  * `boxplot.pars` arg. added to allow customising boxplot and violin plot panels,  
+  with related fixes to colourisation in upper-triangular panels.
+  * Fixes re: `scatter.pars$eci.col`: now governs colours of ellipses _and_ regression lines.
+  * `scatter.pars$uncert.pch` added; now plotting symbols in covariate-related scatterplots  
+  are only modified in `response.type="uncertainty"` plots when `uncert.cov` is `TRUE`.
+  * Fixes to axis labels for diagonal panels involving factors.
+  * Various colour-related args. now inherit sensible defaults if scatterplot colours are specified.
+* `expert_covar` gains the arg. `weighted` to ensure cluster membership probabilities are properly  
+  accounted for in estimating the extra variability due to the component means: defaults to `TRUE`,  
+  but `weighted=FALSE` is provided as an option for recovering the old (not recommended) behaviour.
+* A warning message is now printed if the MLR in the gating network ever fails to converge,  
+  prompting the user to modify the `itmax` arg. to `MoE_control`: the 3<sup>rd</sup> element of this arg. governs  
+  the maximum number of MLR iterations --- consequently, its default has been modified from `100` to  
+  `1000` (thanks to a prompt from Dr. Georgios Karagiannis), which has the effect of slowing down  
+  internal calls to `nnet::multinom` but generally reduces the required number of EM iterations. 
+* Minor fix to `MoE_compare` whenever the optimal model needs to be refitted.
+* Fixed conflict between `mclust::as.Mclust` & `MoEClust::as.Mclust`:  
+`as.Mclust.MoEClust` now works regardless of order in which `mclust` & `MoEClust` are loaded.
+* Stronger checks for variables in `gating` & `expert` formulas which are not found in `network.data`.
+* Minor speed-up to initialisation for univariate response data with expert network covariates.
+* Minor speed-ups to some other utility functions.
+* Minor documentation, vignette, and vignette styling edits.
+
 ## MoEClust v1.3.3 - (_11<sup>th</sup> release [patch update]: 2020-12-29_)
-### New Features, Improvements, Bug Fixes & Miscellaneous Edits
+### New Features, Improvements, Bug Fixes, & Miscellaneous Edits
 * Minor `MoE_stepwise` speed-ups by avoiding duplication of initialisation for certain steps.
 * Minor fix to `MoE_stepwise` for univariate data sets without covariates.
 * Prettier axis labels for `MoE_uncertainty` plots.
 * Minor CRAN compliance edits to the vignette.
 
 ## MoEClust v1.3.2 - (_10<sup>th</sup> release [patch update]: 2020-11-17_)
-### New Features, Improvements, Bug Fixes & Miscellaneous Edits
+### New Features, Improvements, Bug Fixes, & Miscellaneous Edits
 * New `MoE_control` arg. `posidens=TRUE` ensures code no longer crashes when observations  
   have positive log-density: previous behaviour is recoverable by setting `posidens=FALSE`.
 * `MoE_control` gains the arg. `asMclust` (`FALSE`, by default) which modifies the  
@@ -34,10 +82,10 @@ __and a Noise Component__
 * Package startup message now checks if newer version of package is available from CRAN.
 * Updated citation info after publication in _Advances in Data Analysis and Classification_.
 * Updated maintainer e-mail address.
-* Minor documentation, examples, and CRAN compliance + `mclust` compatability edits.
+* Minor documentation, examples, and CRAN compliance + `mclust` compatibility edits.
 
 ## MoEClust v1.3.1 - (_9<sup>th</sup> release [patch update]: 2020-05-12_)
-### New Features, Improvements, Bug Fixes & Miscellaneous Edits
+### New Features, Improvements, Bug Fixes, & Miscellaneous Edits
 * Maintenance release for compatibility with R 4.0.0 - minor edits.
 * `summary.MoEClust` gains the printing-related arguments `classification=TRUE`,  
   `parameters=FALSE`, and `networks=FALSE` (thanks to a request from Prof. Kamel Gana).
@@ -48,12 +96,12 @@ __and a Noise Component__
 * Documentation, vignette, examples, and references improvements.
 
 ## MoEClust v1.3.0 - (_8<sup>th</sup> release [minor update]: 2020-03-30_)
-### New Features, Improvements, Bug Fixes & Miscellaneous Edits
+### New Features, Improvements, Bug Fixes, & Miscellaneous Edits
 * Various fixes and improvements to initialisation when there are expert network covariates:  
     * `MoE_mahala` now correctly uses the covariance of `resids` rather than the response.
     * New `MoE_mahala` arg. `identity` allow use of Euclidean distance instead:  
     this argument can also be passed via `exp.init$identity` to `MoE_control`.
-    * Convergence of the initialisation procedure now explictly monitored & sped-up.
+    * Convergence of the initialisation procedure now explicitly monitored & sped-up.
     * Values of the criterion being minimised are now returned as an attribute.
     * The number of iterations of the initialisation algorithm are also returned as an attribute.
     * `MoE_control` arg. `exp.init$max.init` now defaults to `.Machine$integer.max`.
@@ -77,7 +125,7 @@ __and a Noise Component__
 * Spell-checking of documentation and fixes to `donttest` examples.
 
 ## MoEClust v1.2.4 - (_7<sup>th</sup> release [patch update]: 2019-12-11_)
-### New Features, Improvements, Bug Fixes & Miscellaneous Edits
+### New Features, Improvements, Bug Fixes, & Miscellaneous Edits
 * Fixed small bugs in `MoE_stepwise`:  
     * Improved checks on `network.data` and `data`.
     * Prevented `z.list` from being suppliable.  
@@ -94,7 +142,7 @@ __and a Noise Component__
 * Updated citation info after publication in _Advances in Data Analysis and Classification_.
 
 ## MoEClust v1.2.3 - (_6<sup>th</sup> release [patch update]: 2019-07-29_)
-### New Features, Improvements, Bug Fixes & Miscellaneous Edits
+### New Features, Improvements, Bug Fixes, & Miscellaneous Edits
 * Exported function `MoE_stepwise` for conducting a greedy forward stepwise  
   search to find the optimal model in terms of the number of components, GPCM  
   covariance parameterisation, and the subsets of gating/expert network covariates.
@@ -117,7 +165,7 @@ __and a Noise Component__
 * Removed `parallel` package from `Suggests:`.
 
 ## MoEClust v1.2.2 - (_5<sup>th</sup> release [patch update]: 2019-05-15_)
-### New Features, Improvements, Bug Fixes & Miscellaneous Edits
+### New Features, Improvements, Bug Fixes, & Miscellaneous Edits
 * `noise_vol` now also returns the location of the centre of mass of the region  
   used to estimate the hypervolume, regardless of the method employed. This fixes:    
     * `predict.MoEClust` for any models with a noise component (see below).
@@ -159,7 +207,7 @@ __and a Noise Component__
 * Many documentation and vignette improvements.
 
 ## MoEClust v1.2.1 - (_4<sup>th</sup> release [patch update]: 2018-12-11_)
-### New Features, Improvements, Bug Fixes & Miscellaneous Edits
+### New Features, Improvements, Bug Fixes, & Miscellaneous Edits
 * New `MoE_control` arg. `algo` allows model fitting using the `"EM"` or `"CEM"` algorithm:  
     * Related new function `MoE_cstep` added.
     * Extra `algo` option `"cemEM"` allows running EM starting from convergence of CEM.
@@ -222,7 +270,7 @@ __and a Noise Component__
 * Final `linf` estimate now returned for optimal model when `stopping="aitken"` & G > 1.
 * Removed redundant extra M-step after convergence for models without expert covariates.
 * Removed redundant & erroneous `resid` & `residuals` args. to `as.Mclust` & `MoE_gpairs`.
-* `MoE_plotCrit`, `MoE_plotGate` & `MoE_plotLogLik` now invisibly return revelant quantities.
+* `MoE_plotCrit`, `MoE_plotGate` & `MoE_plotLogLik` now invisibly return relevant quantities.
 * Corrected degrees of freedom calculation for `G=0` models when `noise.init` is not supplied.
 * Fixed `drop_levels` to handle alphanumeric variable names and ordinal variables.
 * Fixed `MoE_compare` when a mix of models with and without a noise component are supplied.

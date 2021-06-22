@@ -2,6 +2,7 @@
 % Please edit documentation in R/Functions.R
 \name{predict.MoEClust}
 \alias{predict.MoEClust}
+\alias{fitted.MoEClust}
 \alias{residuals.MoEClust}
 \title{Predictions for MoEClust models}
 \usage{
@@ -13,6 +14,9 @@
         use.y = TRUE,
         ...)
 
+\method{fitted}{MoEClust}(object,
+       ...)
+
 \method{residuals}{MoEClust}(object,
           newdata,
           ...)
@@ -23,7 +27,7 @@
 \item{newdata}{A list with two \emph{named} components, each of which must be a \code{data.frame} or \code{matrix} with named columns, giving the data for which predictions are desired.
 \describe{
 \item{\code{new.x}}{The new covariates for the \code{gating} &/or \code{expert} networks. \strong{Must} be supplied when \code{newdata$new.y} is supplied.}
-\item{\code{new.y}}{(Optional) response data. When supplied, cluster and response prediction is based on both \code{newdata$new.x} and \code{newdata$new.y}, otherwise only on the covariates in \code{newdata$new.x}.}
+\item{\code{new.y}}{(Optional) response data (see \code{use.y} below). When supplied, cluster and response prediction is based on both \code{newdata$new.x} and \code{newdata$new.y}, otherwise only on the covariates in \code{newdata$new.x}.}
 }
 If supplied as a list with elements \code{new.x} and \code{new.y}, both \strong{must} have the same number of rows.
 
@@ -37,22 +41,24 @@ When \code{newdata} is not supplied in any way, the covariates and response vari
 
 \item{MAPresids}{A logical indicating whether residuals are computed against \code{y} (\code{TRUE}, the default) or \code{MAPy} when \code{FALSE}. Not relevant for models with equal mixing proportions when only \code{new.x} is available. See \strong{Value} below for more details.}
 
-\item{use.y}{A logical indicating whether the response variables (supplied either via \code{new.y} or via \code{newdata} itself) are actually used in the prediction. Defaults to \code{TRUE}, but useful when \code{FALSE} for computing residuals as though only the covariates in \code{new.x} were supplied.}
+\item{use.y}{A logical indicating whether the response variables (if any are supplied either via \code{new.y} or via \code{newdata} itself) are actually used in the prediction. Defaults to \code{TRUE}, but useful when \code{FALSE} for computing residuals as though only the covariates in \code{new.x} were supplied. For out-of-sample prediction, typically \code{new.y} would not be supplied anyway and so the \code{use.y=TRUE} default becomes irrelevant.}
 
-\item{...}{Catches unused arguments (and allows the \code{predict} arguments \code{discard.noise}, \code{MAPresids}, and \code{use.y} to be passed through \code{residuals}).}
+\item{...}{Catches unused arguments (and allows the \code{predict} arguments \code{discard.noise} &/or \code{use.y} to be passed through \code{fitted} or the \code{discard.noise}, \code{MAPresids}, and/or \code{use.y} arguments to be passed through \code{residuals}).}
 }
 \value{
 A list with the following named components, regardless of whether \code{newdata$new.x} and \code{newdata$new.y} were used, or \code{newdata$new.x} only.
 \item{\code{y}}{Aggregated fitted values of the response variables.}
 \item{\code{z}}{A matrix whose \code{[i,k]}-th entry is the probability that observation \emph{i} of the \code{newdata} belongs to the \emph{k}-th component. For models with a noise component, the final column gives the probability of belonging to the so-called \emph{Cluster0}.}
 \item{\code{classification}}{The vector of predicted cluster labels for the \code{newdata}. \code{0} is returned for observations assigned to the noise component.}
-\item{\code{pro}}{The predicted mixing proportions for the \code{newdata}, i.e. predicted values of the gating network. \code{object$parameters$pro} is returned for models without gating network covariates.}
-\item{\code{mean}}{The predicted component means for the \code{newdata}, i.e. predicted values of the expert network. Given as a 3-dimensional array with dimensions given by the number of new observations, the number of variables, and the number of clusters. The first dimension is of length \code{1} when there are no expert network covariates, in which case the entries correspond to \code{object$parameters$mean}.}
+\item{\code{pro}}{The predicted mixing proportions for the \code{newdata}, i.e. predicted values of the gating network. \code{object$parameters$pro} is returned for models without gating network covariates. See \code{\link{predict.MoE_gating}}.}
+\item{\code{mean}}{The predicted component means for the \code{newdata}, i.e. predicted values of the expert network. Given as a 3-dimensional array with dimensions given by the number of new observations, the number of variables, and the number of clusters. The first dimension is of length \code{1} when there are no expert network covariates, in which case the entries correspond to \code{object$parameters$mean}. See \code{\link{predict.MoE_expert}}.}
 \item{\code{MAPy}}{Fitted values of the single expert network to which each observation is most probably assigned. Not returned for models with equal mixing proportions when only \code{new.x} is available. Likely to only be of use for models with gating and expert covariates when only \code{new.x} is supplied. Note that \code{MAPy} and \code{y} will coincide for models fitted via the CEM algorithm (see \code{\link{MoE_control}} and its argument \code{algo}).}
 
 When \code{residuals} is called, only the residuals (governed by \code{MAPresids}) are returned; when \code{predict} is called with \code{resid=TRUE}, the list above will also contain the element \code{resids}, containing the residuals.
 
 The returned values of \code{pro} and \code{mean} are always the same, regardless of whether \code{newdata$new.x} and \code{newdata$new.y} were used, or \code{newdata$new.x} only.
+
+Finally, \code{fitted} is simply a wrapper to \code{predict.MoEClust(object)$y} without any \code{newdata}, and with the \code{resid} and \code{MAPresids} arguments also ignored.
 }
 \description{
 Predicts both cluster membership probabilities and fitted response values from a \code{MoEClust} model, using covariates and response data, or covariates only. The predicted MAP classification, mixing proportions, and component means are all also reported in both cases, as well as the predictions of the expert network corresponding to the most probable component.
@@ -61,21 +67,31 @@ Predicts both cluster membership probabilities and fitted response values from a
 Predictions can also be made for models with a noise component, in which case \code{z} will include the probability of belonging to \code{"Cluster0"} & \code{classification} will include labels with the value \code{0} for observations classified as noise (if any). The argument \code{discard.noise} governs how the responses are predicted in the presence of a noise component (see \code{\link{noise_vol}} for more details).
 
 Note that the argument \code{discard.noise} is invoked for any models with a noise component, while the similar \code{\link{MoE_control}} argument \code{noise.args$discard.noise} is only invoked for models with both a noise component and expert network covariates.
+
+Please be aware that a model considered optimal from a clustering point of view may not necessarily be optimal from a prediction point of view. In particular, full MoE models with covariates in both networks (for which both the cluster membership probabilities and component means are observation-specific) are recommended for out-of-sample prediction when only new covariates are observed (see \code{new.x} and \code{new.y} above, as well as \code{use.y}).
+}
+\note{
+Note that a dedicated \code{\link[=predict.MoE_gating]{predict}} function is also provided for objects of class \code{"MoE_gating"} (typically \code{object$gating}, where \code{object} is of class \code{"MoEClust"}). This function is effectively a shortcut to \code{predict(object, ...)$pro}, which (unlike the \code{predict} method for \code{\link[nnet]{multinom}} on which it is based) accounts for the various ways of treating gating covariates and noise components, although its \code{type} argument defaults to \code{"probs"} rather than \code{"class"}. Notably, its \code{keep.noise} argument behaves differently from the \code{discard.noise} argument here; here, the noise component is \strong{only} discarded in the computation of the predicted responses. See \code{\link{predict.MoE_gating}} for further details.
+
+Similarly, a dedicated \code{\link[=predict.MoE_expert]{predict}} function is also provided for objects of class \code{"MoE_expert"} (typically \code{object$expert}, where \code{object} is of class \code{"MoE_expert"}). This function is effectively a wrapper to \code{predict(object, ...)$mean}, albeit it returns a list (by default) rather than a 3-dimensional array and also \emph{always} preserves the dimensions of \code{newdata}, even for models without expert network covariates. See \code{\link{predict.MoE_expert}} for further details.
 }
 \examples{
 data(ais)
-
 # Fit a MoEClust model and predict the same data
-res     <- MoE_clust(ais[,3:7], G=2, gating=~BMI, expert=~sex,
+res     <- MoE_clust(ais[,3:7], G=2, gating= ~ BMI, expert= ~ sex,
                      modelNames="EVE", network.data=ais)
 pred1   <- predict(res)
+
+# Get only the fitted responses
+fits    <- fitted(res)
+all.equal(pred1$y, fits) #TRUE
 
 # Remove some rows of the data for prediction purposes
 ind     <- sample(1:nrow(ais), 5)
 dat     <- ais[-ind,]
 
 # Fit another MoEClust model to the retained data
-res2    <- MoE_clust(dat[,3:7], G=3, gating=~BMI + sex,
+res2    <- MoE_clust(dat[,3:7], G=3, gating= ~ BMI + sex,
                      modelNames="EEE", network.data=dat)
 
 # Predict held back data using the covariates & response variables
@@ -95,11 +111,11 @@ residuals(res2, newdata=ais[ind,])
 Murphy, K. and Murphy, T. B. (2020). Gaussian parsimonious clustering models with covariates and a noise component. \emph{Advances in Data Analysis and Classification}, 14(2): 293-325. <\doi{10.1007/s11634-019-00373-8}>.
 }
 \seealso{
-\code{\link{MoE_clust}}, \code{\link{MoE_control}}, \code{\link{noise_vol}}
+\code{\link{MoE_clust}}, \code{\link{MoE_control}}, \code{\link{noise_vol}}, \code{\link{predict.MoE_gating}}, \code{\link{predict.MoE_expert}}
 }
 \author{
 Keefe Murphy - <\email{keefe.murphy@mu.ie}>
 }
-\keyword{clustering}
 \keyword{main}
+\keyword{prediction}
 \keyword{utility}
