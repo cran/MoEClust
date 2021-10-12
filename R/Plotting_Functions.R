@@ -11,7 +11,7 @@
 #' The result of the subsetting must include at least two variables, whether they be the MAP classification, a response variable, or a covariate, in order to be valid for plotting purposes. The arguments \code{data.ind} and \code{cov.ind} can also be used to simply reorder the panels, without actually subsetting.
 #' @param response.type The type of plot desired for the scatterplots comparing continuous response variables. Defaults to \code{"points"}. See \code{scatter.pars} below.
 #'
-#' Points can also be sized according to their associated clustering uncertainty with the option \code{"uncertainty"}. In doing so, the transparency of the points will also be proportional to their clustering uncertainty, provided the device supports transparency. See also \code{\link{MoE_Uncertainty}} for an alternative means of visualising observation-specific cluster uncertainties (especially for univariate data). See \code{scatter.pars} below.
+#' Points can also be sized according to their associated clustering uncertainty with the option \code{"uncertainty"}. In doing so, the transparency of the points will also be proportional to their clustering uncertainty, provided the device supports transparency. See also \code{\link{MoE_Uncertainty}} for an alternative means of visualising observation-specific cluster uncertainties (especially for univariate data). See \code{scatter.pars} below, and note that models fitted via the \code{"CEM"} algorithm will have no associated clustering uncertainty.
 #'
 #' Alternatively, the bivariate \code{"density"} contours can be displayed (see \code{density.pars}), provided there is at least one Gaussian component in the model. Caution is advised when producing density plots for models with covariates in the expert network; the required number of evaluations of the (multivariate) Gaussian density for each panel (\code{res$G * prod(density.pars$grid.size)}) increases by a factor of \code{res$n}, thus plotting may be slow (particularly for large data sets). See \code{density.pars} below.
 #' @param scatter.type A vector of length 2 (or 1) giving the plot type for the upper and lower triangular portions of the plot, respectively, pertaining to the associated covariates. Defaults to \code{"lm"} for covariate vs. response panels and \code{"points"} otherwise. Only relevant for models with continuous covariates in the gating &/or expert network. \code{"ci"} and \code{"lm"} type plots are only produced for plots pairing covariates with response, and never response vs. response or covariate vs. covariate. Note that lines &/or confidence intervals will only be drawn for continuous covariates included in the expert network; to include covariates included only in the gating network also, the options \code{"lm2"} or \code{"ci2"} can be used but this is not generally advisable. See \code{scatter.pars} below.
@@ -194,6 +194,15 @@ MoE_gpairs.MoEClust <- function(res, response.type = c("points", "uncertainty", 
   both  <- attr(net, "Both")
   gate  <- setdiff(attr(net, "Gating"), both)
   expx  <- setdiff(attr(net, "Expert"), both)
+  subset            <- if(!is.null(subset)          && inherits(subset,         "list")) subset
+  scatter.pars      <- if(!is.null(scatter.pars)    && inherits(scatter.pars,   "list")) scatter.pars
+  density.pars      <- if(!is.null(density.pars)    && inherits(density.pars,   "list")) density.pars
+  stripplot.pars    <- if(!is.null(stripplot.pars)  && inherits(stripplot.pars, "list")) stripplot.pars
+  boxplot.pars      <- if(!is.null(boxplot.pars)    && inherits(boxplot.pars,   "list")) boxplot.pars
+  barcode.pars      <- if(!is.null(barcode.pars)    && inherits(barcode.pars,   "list")) barcode.pars
+  mosaic.pars       <- if(!is.null(mosaic.pars)     && inherits(mosaic.pars,    "list")) mosaic.pars
+  axis.pars         <- if(!is.null(axis.pars)       && inherits(axis.pars,      "list")) axis.pars
+  diag.pars         <- if(!is.null(diag.pars)       && inherits(diag.pars,      "list")) diag.pars
   if(is.null(subset$show.map)) {
     subset$show.map <- (length(unique(claSS)) != 1) && ((G + !is.na(res$hypvol) > 1))
   } else {
@@ -380,6 +389,7 @@ MoE_gpairs.MoEClust <- function(res, response.type = c("points", "uncertainty", 
     } else                                            stop("'scatter.pars$eci.col' must be of length 1 or G", call.=FALSE)
   }
   if(response.type == "uncertainty")  {
+    if(attr(res, "Algo")     == "CEM")                message("Model was fitted by CEM and has no clustering uncertainty\n")
     uncertainty         <- res$uncertainty
     uncertainty         <- res$uncertainty <- (uncertainty - min(uncertainty))/(diff(range(uncertainty)) + .Machine$double.eps)
     bubbleX             <- .bubble(uncertainty, cex=c(0.3, 2.8), alpha=c(0.3, 0.8))
@@ -905,6 +915,7 @@ MoE_Uncertainty.MoEClust <- function(res, type = c("barplot", "profile"), truth 
   }
   G          <- res$G + noise
   if(G == 1)                                          message("No clustering has taken place!\n")
+  if(attr(res, "Algo") == "CEM")                      message("Model was fitted by CEM: no uncertainties to plot\n")
   oneG       <- 1/G
   min1G      <- 1   - oneG
   yx         <- unique(c(0, pretty(c(0, min1G))))
