@@ -24,8 +24,8 @@
 #' \itemize{
 #' \item{Type: }{Package}
 #' \item{Package: }{MoEClust}
-#' \item{Version: }{1.4.1}
-#' \item{Date: }{2021-10-12 (this version), 2017-11-28 (original release)}
+#' \item{Version: }{1.4.2}
+#' \item{Date: }{2021-12-19 (this version), 2017-11-28 (original release)}
 #' \item{Licence: }{GPL (>=2)}
 #' }
 #'
@@ -89,7 +89,7 @@
   version <- read.dcf(path, "Version")
   name    <- read.dcf(path, "Package")
   if(interactive()) {
-    packageStartupMessage(paste("\n___  ___      _____ _____ _           _   \n|  \\/  |     |  ___/  __ \\ |         | |     Gaussian Parsimonious \n| .  . | ___ | |__ | /  \\/ |_   _ ___| |_   Clustering Models with\n| |\\/| |/ _ \\|  __|| |   | | | | / __| __|\t  Covariates and a\n| |  | | (_) | |___| \\__/\\ | |_| \\__ \\ |_\t   Noise Component\n\\_|  |_/\\___/\\____/ \\____/_|\\__,_|___/\\__|\t     version", version, "\n"))
+    packageStartupMessage(paste("\n___  ___      _____ _____ _           _   \n|  \\/  |     |  ___/ .__ \\ |         | |     Gaussian Parsimonious \n| .  . | ___ | |__ | |  \\/ |_   _ ___| |_   Clustering Models with\n| |\\/| |/ _ \\|  __|| |   | | | | / __| ._|\t  Covariates and a\n| |  | | (_) | |___| |__/\\ | |_| \\__ \\ |_\t   Noise Component\n\\_|  |_/\\___/\\____/ \\____/_|\\__,_|___/\\__|\t     version", version, "\n"))
   } else   {
     packageStartupMessage("\nPackage ", sQuote(name), " version ", version, ".\n")
   }
