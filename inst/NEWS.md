@@ -5,10 +5,29 @@ __with Gating and Expert Network Covariates__
 __and a Noise Component__
 =======================================================
 
+## MoEClust v1.5.0 - (_15<sup>th</sup> release [minor update]: 2022-03-25_)
+### Significant User-Visible Changes
+* Checks/fixes for empty components extended to components w/ `<=1` observations (or equivalent):  
+__important__ --- some rare cases which previously would not converge will now converge!
+* Fixed _significant_ bugs related to `exp.init$malanabis=TRUE` (the default) introduced in v1.4.1,  
+__important__ --- restored correct behaviour, especially when multiple `modelNames` are being fitted!
+
+### New Features & Improvements
+* New function `MoE_entropy` added.
+* Added `summary` (and related `print`) methods for `MoECriterion` objects.
+* Minor speed-up to E-step for `"EEE"` & `"VVV"` models.
+
+### Big Fixes & Miscellaneous Edits
+* Allowed `G=0:X` in `MoE_clust` without adding noise for `G>0`, unless  
+specifying models w/ noise, undoing another bug introduced in v1.4.1.
+* Fixed minor bug when supplying `modelNames` when `G=1` only.
+* Fixed check on validity of `hc.meth` arg. in `MoE_control`.
+* Minor documentation clarifications re: `z.list` in `MoE_control`.
+
 ## MoEClust v1.4.2 - (_14<sup>th</sup> release [patch update]: 2021-12-19_)
 ### New Features, Improvements, Big Fixes, & Miscellaneous Edits
 * `MoE_mahala` arg. `identity` (& related `MoE_control` `exp.init$identity` option) is now also  
-  relevant for univariate data: old bevahiour is retained via respective defaults of `FALSE` & `TRUE` for  
+  relevant for univariate data: old behaviour is retained via respective defaults of `FALSE` & `TRUE` for  
   multivariate & univariate data (i.e. only ability to set `identity=FALSE` for univariate data is new).
 * Fixed `MoE_clust` bug when `tau0` is specified but `G` is not (introduced in last update).
 * Minor speed-up to `MoE_gpairs(response.type="density")` w/ expert covariates & noise component.
