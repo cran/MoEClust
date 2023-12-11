@@ -8,14 +8,14 @@ if(isTRUE(capabilities("cairo"))) {
   knitr::opts_chunk$set(dev.args=list(type="cairo"))
 }
 
-## ---- eval=FALSE--------------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  install.packages('devtools')
 #  devtools::install_github('Keefe-Murphy/MoEClust')
 
-## ---- eval=FALSE--------------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  install.packages('MoEClust')
 
-## ---- echo=FALSE--------------------------------------------------------------
+## ----echo=FALSE---------------------------------------------------------------
 suppressMessages(library(mclust))
 
 ## -----------------------------------------------------------------------------
@@ -26,7 +26,7 @@ data(CO2data)
 CO2   <- CO2data$CO2
 GNP   <- CO2data$GNP
 
-## ---- echo=FALSE--------------------------------------------------------------
+## ----echo=FALSE---------------------------------------------------------------
 m1    <- MoE_clust(CO2, G=1:3, verbose=FALSE)
 m2    <- MoE_clust(CO2, G=2:3, gating= ~ GNP, verbose=FALSE)
 m3    <- MoE_clust(CO2, G=1:3, expert= ~ GNP, verbose=FALSE)
@@ -34,7 +34,7 @@ m4    <- MoE_clust(CO2, G=2:3, gating= ~ GNP, expert= ~ GNP, verbose=FALSE)
 m5    <- MoE_clust(CO2, G=2:3, equalPro=TRUE, verbose=FALSE)
 m6    <- MoE_clust(CO2, G=2:3, expert= ~ GNP, equalPro=TRUE, verbose=FALSE)
 
-## ---- eval=FALSE--------------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  m1    <- MoE_clust(CO2, G=1:3)
 #  m2    <- MoE_clust(CO2, G=2:3, gating= ~ GNP)
 #  m3    <- MoE_clust(CO2, G=1:3, expert= ~ GNP)
@@ -60,7 +60,7 @@ comp  <- MoE_compare(m1, m2, m3, m4, m5, m6, optimal.only=TRUE)
 ## -----------------------------------------------------------------------------
 plot(best, what="gpairs", jitter=FALSE)
 
-## ---- echo=FALSE--------------------------------------------------------------
+## ----echo=FALSE---------------------------------------------------------------
 res    <- best
 G      <- res$G
 expert <- res$expert
@@ -83,35 +83,35 @@ box(lwd=1)
 contour(x.new, y.new, mat, add=TRUE, col="grey60", labcex=0.75)
 points(GNP, CO2)
 
-## ---- fig.height=5.5, fig.width=5.5-------------------------------------------
+## ----fig.height=5.5, fig.width=5.5--------------------------------------------
 mod <- as.Mclust(comp$optimal)
 plot(mod, what="classification")
 
-## ---- fig.height=5.5, fig.width=5.5-------------------------------------------
+## ----fig.height=5.5, fig.width=5.5--------------------------------------------
 plot(mod, what="uncertainty")
 
-## ---- eval=FALSE--------------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  as.vector(predict(comp$optimal)$y)
 
-## ---- echo=FALSE--------------------------------------------------------------
+## ----echo=FALSE---------------------------------------------------------------
 as.vector(suppressWarnings(predict(comp$optimal)$y))
 
-## ---- echo=FALSE--------------------------------------------------------------
+## ----echo=FALSE---------------------------------------------------------------
 set.seed(4321)
 
-## ---- results="hide"----------------------------------------------------------
+## ----results="hide"-----------------------------------------------------------
 ind     <- sample(1:nrow(CO2data), 2)
 res     <- MoE_clust(CO2data[-ind,]$CO2, G=3, expert= ~ GNP, 
                      equalPro=TRUE, network.data=CO2data[-ind,])
 
-## ---- eval=FALSE--------------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  # Using new covariates only
 #  predict(res, newdata = CO2data[ind,], use.y = FALSE)[1:3]
 #  
 #  # Using both new covariates & new response data
 #  predict(res, newdata = CO2data[ind,])[1:3]
 
-## ---- echo=FALSE--------------------------------------------------------------
+## ----echo=FALSE---------------------------------------------------------------
 # Using new covariates only
 suppressWarnings(predict(res, newdata = CO2data[ind,], use.y = FALSE)[1:3])
 
@@ -122,14 +122,14 @@ predict(res, newdata = CO2data[ind,])[1:3]
 data(ais)
 hema  <- ais[,3:7]
 
-## ---- eval=FALSE--------------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  ?MoE_control
 
-## ---- eval=FALSE--------------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  mod   <- MoE_clust(hema, G=1:3, expert= ~ sex, gating= ~ BMI,
 #                     network.data=ais, tau0=0.1, noise.gate=FALSE)
 
-## ---- echo=FALSE--------------------------------------------------------------
+## ----echo=FALSE---------------------------------------------------------------
 mod   <- suppressWarnings(MoE_clust(hema, G=1:3, expert= ~ sex, gating= ~ BMI, network.data=ais, tau0=0.1, noise.gate=FALSE, verbose=FALSE))
 
 ## -----------------------------------------------------------------------------
@@ -144,33 +144,33 @@ plot(mod, what="gpairs", response.type="uncertainty")
 ## -----------------------------------------------------------------------------
 plot(mod, what="uncertainty", type="profile")
 
-## ---- echo=FALSE--------------------------------------------------------------
+## ----echo=FALSE---------------------------------------------------------------
 plot(mod, what="criterion", legendArgs=list(x="right"))
 
 ## -----------------------------------------------------------------------------
 plot(mod, what="gating", x.axis=ais$BMI, xlab="BMI")
 
-## ---- eval=FALSE--------------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  plot(mod, what="loglik")
 
-## ---- echo=FALSE--------------------------------------------------------------
+## ----echo=FALSE---------------------------------------------------------------
 plot(mod, what="loglik")
 
-## ---- eval=FALSE--------------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  require("lattice")
 #  z <- factor(mod$classification[mod$classification > 0],
 #              labels=paste0("Cluster", seq_len(mod$G)))
 #  splom(~ hema | ais$sex, groups=z, xlab=NULL)
 
-## ---- echo=FALSE, fig.height=4------------------------------------------------
+## ----echo=FALSE, fig.height=4-------------------------------------------------
 require("lattice", quietly=TRUE)
 z <- factor(mod$classification[mod$classification > 0], labels=paste0("Cluster", seq_len(mod$G)))
 splom(~ hema | ais$sex, groups=z, xlab=NULL)
 
-## ---- eval=FALSE--------------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  splom(~ hema | z, groups=ais$sex, xlab=NULL)
 
-## ---- echo=FALSE, fig.height=4------------------------------------------------
+## ----echo=FALSE, fig.height=4-------------------------------------------------
 require("lattice", quietly=TRUE)
 splom(~ hema | z, groups=ais$sex, xlab=NULL)
 

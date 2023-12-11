@@ -5,7 +5,21 @@ __with Gating and Expert Network Covariates__
 __and a Noise Component__
 =======================================================
 
-## MoEClust v1.5.1 - (_16<sup>th</sup> release [minor update]: 2022-12-19_)
+## MoEClust v1.5.2 - (_17<sup>th</sup> release [patch update]: 2023-12-10_)
+### New Features, Improvements, Bug Fixes, & Miscellaneous Edits
+* Massive speed-ups for models w/ expert covariates by replacing `stats::lm` w/ `stats::lm.wfit`:  
+  returned output in `x$expert` is still formatted as per `stats::lm`.
+* Semi-related fixes to expert & gating network output for models w/ no covariates in those parts:  
+  coefficients now accurately reflect corresponding estimates of means & mixing proportions  
+  (especially for models with a noise component &/or `equalPro=TRUE`).
+* `MoE_entropy` and `MoE_AvePP` both gain the arg. `group` for computing the average entropies  
+and posterior probabilities of each component, respectively: defaults to `FALSE`, i.e. old behaviour.
+* Added `FARI` for computing the Frobenius (adjusted) Rand index between two soft &/or hard partitions.
+* Fixed bug in `as.Mclust` for models w/ gating & expert covariates when `expert.covar=TRUE`.
+* Extensive edits to avoid overheads introduced in `matrixStats (>= 1.0.0)` + related minor speed-ups.
+* Now using newer `CITATION` commands & updated `License: GPL (>= 3)`.
+
+## MoEClust v1.5.1 - (_16<sup>th</sup> release [patch update]: 2022-12-19_)
 ### New Features, Improvements, Bug Fixes, & Miscellaneous Edits
 * New `MoE_gpairs` arg. `diag.pars$show.dens=FALSE` added to toggle whether  
   parametric density estimates are drawn over diagonal panels for each response  
